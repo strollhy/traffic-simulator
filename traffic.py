@@ -3,7 +3,7 @@ __author__ = 'hongyusong'
 
 class Car():
     def __init__(self, data):
-        self.car_id = data[0]     #车IDDD
+        self.car_id = data[0]     #车S
         self.path = Path(data[1])
         self.start_time = data[2]
         self.distance = 0
