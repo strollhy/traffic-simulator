@@ -22,15 +22,16 @@ class Rule():
     def cal_density(self,link):
         N=link.num_of_cars
         x=link.sublink_1+link.sublink_2
-        n=link.num_of_lane
+        n=link.num_of_lanes
         l=link.length
         rho_jam=220
         rho=(N-x)/(n*l-x/rho_jam)
         return rho
+
     def cal_velocity(self,link):
         v_min=link.min_speed
         v_free=link.max_speed
-        rho=link.avg_density
+        rho=self.avg_density(link)
         rho_jam=220
         alpha=1.2
         beta=1.8
