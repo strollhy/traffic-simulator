@@ -37,16 +37,17 @@ class Link():
         self.left_link = 0
         self.right_link = 0
         self.through_link = 0
-
+        self.time=0 # ？ 应该在LINK上加上时间刻度，因为不同时间num of cars 是不同的吧
         self.length = 0
+        self.num_of_lane=0 #？新加车道数
         self.num_of_cars = 0
         self.capacity = 0
         self.max_speed = 0
         self.min_speed = 0
         self.avg_speed = 0
         self.avg_density = 0
-
-        self.sublink_1 = []
+        self.sublink_1 = [] # Sublink1的车辆数
+        self.sublink_1 = [] # Sublink2得车辆数
         self.sublink_2 = []
         self.left_lane = []
         self.right_lane = []
