@@ -3,7 +3,7 @@ __author__ = 'hongyusong'
 
 class Car():
     def __init__(self, data):
-        self.car_id = data[0]     #车S
+        self.car_id = data[0]
         self.path = Path(data[1])
         self.start_time = data[2]
         self.distance = 0
@@ -37,17 +37,16 @@ class Link():
         self.left_link = 0
         self.right_link = 0
         self.through_link = 0
-
         self.length = 0
+        self.num_of_lanes=0
         self.num_of_cars = 0
         self.capacity = 0
         self.max_speed = 0
         self.min_speed = 0
         self.avg_speed = 0
         self.avg_density = 0
-
-        self.sublink_1 = []
-        self.sublink_2 = []
+        self.sublink_1 = [] # Sublink1的车辆数
+        self.sublink_2 = [] # Sublink2得车辆数
         self.left_lane = []
         self.right_lane = []
         self.through_lane = []
