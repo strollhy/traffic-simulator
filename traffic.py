@@ -4,7 +4,7 @@ __author__ = 'hongyusong'
 class Car():
     def __init__(self, data):
         self.car_id = data[0]
-        self.path = Path(data[1])
+        self.path = data[1]
         self.start_time = data[2]
         self.distance = 0
         self.speed = 0
@@ -12,28 +12,25 @@ class Car():
         self.location = None
 
 
-class Node():
-    def __init__(self, data):
-        self.node_id = data[0]
-        self.link_id = data[1]
-        self.left_light = data[2]
-        self.right_light = data[3]
-        self.through_light = data[4]
-        self.time = data[5]             # TODO when to use it?
+class Light():
+    def __init__(self, red_period, green_period, light=0):
+        self.red_period = red_period
+        self.green_period = green_period
+        self.light = light
 
-    def update(self, data):
-        self.left_light, self.right_light, self.through_light = data
+    def clone(self):
+        return Light(self.red_period, self.green_period, self.light)
 
+    def reverse_clone(self):
+        return Light(self.green_period, self.red_period, 1 - self.light)
 
-class Path():
-    def __init__(self, od):
-        self.od = [int(p) for p in od.split('-')]
+    def update_status(self):
+        pass
 
 
 class Link():
     def __init__(self, *args):
-        self.link_id = 0
-        self.nodes = {}
+        self.link_id = ()
         self.left_link = 0
         self.right_link = 0
         self.through_link = 0
@@ -45,8 +42,13 @@ class Link():
         self.min_speed = 0
         self.avg_speed = 0
         self.avg_density = 0
-        self.sublink_1 = [] # Sublink1的车辆数
-        self.sublink_2 = [] # Sublink2得车辆数
-        self.left_lane = []
-        self.right_lane = []
-        self.through_lane = []
+        self.sublink_1 = [] #Cars in Sublink1
+        self.sublink_2 = [] #Cars in Sublink2
+        self.left_lane = [] #cars in the last left lane
+        self.right_lane = [] #cars in the last right lane
+        self.through_lane = [] #cars in the last through lane
+        self.lights = []
+
+    def update_lights(self):
+        for light in self.lights:
+            light.update_status()

@@ -5,21 +5,19 @@ from rule import Rule
 
 ######################################################
 fake_data = dict()
-fake_data["cars"] = [[1, "1-2", 1000],
-                     [2, "2-3", 1001]]
-fake_data["links"] = [[1, 1, 2, 1000, 4, 20, 50, 220, 4, 5, 5],
-                      [2, 2, 3, 800, 4, 20, 50, 220, 4, 5, 5],
-                      [3, 3, 4, 900, 4, 20, 50, 220, 4, 5, 5]]
+fake_data["cars"] = [[1, "1,2", 0],
+                     [2, "2,3", 1],
+                     [3, "3,2", 10]]
+fake_data["links"] = [[1, 1000, 4, 20, 50, 220, 4, 5, 5],
+                      [2, 800, 4, 20, 50, 220, 4, 5, 5],
+                      [3, 900, 4, 20, 50, 220, 4, 5, 5]]
 fake_data["link_link"] = [[1, 2, 0, 0],
-                          [2, 0, 0, 1],
+                          [2, 0, 0, 3],
                           [3, 0, 0, 0]]
-fake_data["nodes"] = [[1, 1, 1, 1, 0, 1000],
-                      [2, 2, 1, 1, 0, 1000],
-                      [3, 3, 1, 1, 0, 1000],]
+fake_data["lights"] = [[1, "40,30", "50,50", "30,40"],
+                       [2, "40,30", "50,50", "30,40"],
+                       [3, "40,30", "50,50", "30,40"],]
 
-fake_data["timestamp"] = [[1, 0, 1, 1, 0, 1010],
-                          [2, 1, 1, 1, 0, 1020],
-                          [3, 2, 1, 1, 0, 1030]]
 ######################################################
 
 
@@ -28,19 +26,17 @@ class Simulator:
         self.time = 0
         self.cars = {}
         self.links = {}
-        self.nodes = {}
         self.setup_cars()
         self.setup_links()
-        self.setup_nodes()
+        self.setup_lights()
         self.rule = Rule(self)
 
     def start(self):
         # TODO load from files
-        self.time_stamp = fake_data['timestamp']
         self.next_time_stamp()
 
     def next_time_stamp(self):
-        self.update_nodes()
+        self.update_lights()
         self.update_cars()
         self.update_links()
         self.time += 1
@@ -68,17 +64,16 @@ class Simulator:
                 self.links[link_id].through_link = data[3]
                 self.links[data[3]].through_link = link_id
 
-    def setup_nodes(self):
+    def setup_lights(self):
         # Setup nodes
-        for data in fake_data["nodes"]:
-            node_id = data[0]
-            node = Node(data)
-            self.nodes[node_id] = node
-            self.links[data[1]].nodes[node_id] = node
+        for data in fake_data["lights"]:
+            link_id = data[0]
+            for light_data in data[1:]:
+                self.links[link_id].lights.append(Light(*light_data.split(',')))
 
-    def update_nodes(self):
-        for data in self.time_stamp:
-            self.nodes[data[0]].update(data[2:5])
+    def update_lights(self):
+        for link in self.links.values():
+            link.update_lights()
 
     def update_cars(self):
         self.rule.update_cars()
