@@ -8,16 +8,17 @@ class Rule():
 
     def setup(self):
         # calculate all statuses
-        self.update_cars()
         self.update_links()
 
     def update_cars(self):
-        # update car status based on node&link status
-        pass
+        for link in self.simulator.links.values():
+            link.sublink3.update_cars()
+            link.sublink2.update_cars()
+            link.sublink1.update_cars()
 
     def update_links(self):
-        # update link based on car status
-        pass
+        for link in self.simulator.links.values():
+            link.update_status()
 
     def cal_density(self, link):
         N = link.num_of_cars
