@@ -88,13 +88,11 @@ class Simulator:
 
     # outputs
     def print_status(self):
-        print "==== Time Stamp %d =====" % self.time
+        print "==== Time Stamp %ds =====" % (self.time * 10)
         for link_id in sorted(self.links.keys()):
             link = self.links[link_id]
             link.sublink3.print_lights()
-            print len(link.sublink1.cars), \
-                  len(link.sublink2.cars), \
-                  len(link.sublink3.left_lane), len(link.sublink3.right_lane), len(link.sublink3.through_lane)
+
 
 if __name__ == '__main__':
     simulator = Simulator()

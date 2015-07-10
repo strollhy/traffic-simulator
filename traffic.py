@@ -46,14 +46,13 @@ class Link(object):
 
 
 class MainLink(Link):
-    def __init__(self, link_id, length, num_of_lanes, min_speed,
-                 max_speed, jam_density, left_cap, right_cap, through_cap):
-        self.link_id = link_id
-        self.length = length
-        self.num_of_lanes = num_of_lanes
-        self.max_speed = min_speed
-        self.min_speed = max_speed
-        self.jam_density = jam_density
+    def __init__(self, *data):
+        self.link_id = data[0]
+        self.length = data[1]
+        self.num_of_lanes = data[2]
+        self.max_speed = data[3]
+        self.min_speed = data[4]
+        self.jam_density = data[5]
 
         self.left_link = None
         self.right_link = None
@@ -62,12 +61,9 @@ class MainLink(Link):
         self.num_of_cars = 0
         self.capacity = 0
         self.avg_speed = 0
-        self.sublink1 = SubLink1(self)
-        self.sublink2 = SubLink2(self)
-        self.sublink3 = SubLink3(self)
-        self.sublink3.left_cap = left_cap
-        self.sublink3.right_cap = right_cap
-        self.sublink3.through_cap = through_cap
+        self.sublink1 = SubLink1(self, len(data[6:]) - 1)
+        self.sublink2 = SubLink2(self, len(data[6:]) - 1)
+        self.sublink3 = SubLink3(self, len(data[6:]))
 
     def add_car(self, car):
         self.sublink1.add_car(car)
@@ -88,38 +84,37 @@ class MainLink(Link):
 
 
 class SubLink(Link):
-    def __init__(self, link):
+    def __init__(self, link, lane_num):
         self.link = link
-        self.cars = []
+        self.lanes = [[] for i in xrange(lane_num)]
 
 
 class SubLink1(SubLink):
     def add_car(self, car):
-        self.cars.append(car)
+        self.lanes[0].append(car)
 
     def update_cars(self):
-        for car in self.cars:
-            if self.link.sublink2.add_car(car):
-                self.cars.remove(car)
+        for i in xrange(len(self.lanes)):
+            for car in self.lanes[i]:
+                if car.step == len(car.path) or self.link.sublink2.add_car(car, i):
+                    self.lanes[i].remove(car)
 
 
 class SubLink2(SubLink):
-    def __init__(self, link):
-        super(SubLink2, self).__init__(link)
-
-    def add_car(self, car):
-        self.cars.append(car)
+    def add_car(self, car, lane_no):
+        self.lanes[lane_no].append(car)
         return True
 
     def update_cars(self):
-        for car in self.cars:
-            if self.link.sublink3.add_car(car):
-                self.cars.remove(car)
+        for i in xrange(len(self.lanes)):
+            for car in self.lanes[i]:
+                if car.step == len(car.path) or self.link.sublink3.add_car(car, i):
+                    self.lanes[i].remove(car)
 
 
 class SubLink3(SubLink):
-    def __init__(self, link):
-        super(self.__class__, self).__init__(link)
+    def __init__(self, link, lane_num):
+        super(self.__class__, self).__init__(link, lane_num)
         self.lights = []
         self.left_lane = [] #cars in the last left lane
         self.right_lane = [] #cars in the last right lane
@@ -128,7 +123,7 @@ class SubLink3(SubLink):
         self.right_cap = 0
         self.through_cap = 0
 
-    def add_car(self, car):
+    def add_car(self, car, lane_no):
         next_link_id = car.get_next_link_id()
         direction = self.link.get_direction(next_link_id)
 
@@ -153,6 +148,7 @@ class SubLink3(SubLink):
         if self.lights[0] and self.link.left_link:
             while len(self.left_lane) > 0:
                 car = self.left_lane.pop(0)
+                if car.step == len(car.path): continue
                 print "Car #%s left turn to Link #%s" % (car.car_id, self.link.left_link.link_id)
                 self.link.left_link.add_car(car)
                 car.update_status()
@@ -160,6 +156,7 @@ class SubLink3(SubLink):
         if self.lights[1] and self.link.through_link:
             while len(self.through_lane) > 0:
                 car = self.through_lane.pop(0)
+                if car.step == len(car.path): continue
                 print "Car #%s moving to Link #%s" % (car.car_id, self.link.through_link.link_id)
                 self.link.through_link.add_car(car)
                 car.update_status()
@@ -167,6 +164,7 @@ class SubLink3(SubLink):
         if self.lights[2] and self.link.right_link:
             while len(self.right_lane) > 0:
                 car = self.right_lane.pop(0)
+                if car.step == len(car.path): continue
                 print "Car #%s right turn to Link #%s" % (car.car_id, self.link.right_link.link_id)
                 self.link.right_link.add_car(car)
                 car.update_status()
