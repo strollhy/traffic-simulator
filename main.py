@@ -1,12 +1,22 @@
 __author__ = 'hongyusong'
 
 from traffic import *
+from link import *
 from rule import Rule
 
 ######################################################
 car_data = [["1", "1,2,3", "0"],
             ["2", "2,3", "1"],
-            ["3", "3,2,1", "10"]]
+            ["3", "1,2", "2"],
+            ["4", "1,2,3", "1"],
+            ["5", "1,2,3", "2"],
+            ["6", "1,2,3", "3"],
+            ["7", "2,3", "2"],
+            ["8", "1,2,3", "3"],
+            ["9", "1,2,3", "3"],
+            ["10", "1,2,3", "3"],
+            ["11", "1,2,3", "3"],
+            ]
 link_data = [["1000", "4", "20", "50", "220", "4", "5", "5"],
              ["800", "4", "20", "50", "220", "4", "5", "5"],
              ["900", "4", "20", "50", "220", "4", "5", "5"]]
@@ -45,6 +55,7 @@ class Simulator:
         # Setup cars
         for data in car_data:
             car = Car(*data)
+            car.get_directions(self.get_directions)
             self.cars[data[0]] = car
             self.links[car.path[0]].sublink1.add_car(car)
 
@@ -76,6 +87,15 @@ class Simulator:
             for light in data[1:]:
                 self.links[link_id].sublink3.lights.append(Light(*light.split(',')))
 
+    def get_directions(self, link_id, next_link_id):
+        link = self.links[link_id]
+        if link.left_link and link.left_link.link_id == next_link_id:
+            return "L"
+        if link.right_link and link.right_link.link_id == next_link_id:
+            return "R"
+        if link.through_link and link.through_link.link_id == next_link_id:
+            return "T"
+
     def update_lights(self):
         for link in self.links.values():
             link.sublink3.update_lights(self.time)
@@ -89,9 +109,9 @@ class Simulator:
     # outputs
     def print_status(self):
         print "==== Time Stamp %ds =====" % (self.time * 10)
-        for link_id in sorted(self.links.keys()):
-            link = self.links[link_id]
-            link.sublink3.print_lights()
+        # for link_id in sorted(self.links.keys()):
+        #     link = self.links[link_id]
+        #     link.sublink3.print_lights()
 
 
 if __name__ == '__main__':
