@@ -2,9 +2,9 @@ __author__ = 'hongyusong'
 
 
 class Car():
-    def __init__(self, car_id, path, start_time):
+    def __init__(self, car_id, start_time, path):
         self.car_id = car_id
-        self.path = path.split(",")
+        self.path = path.split("-")
         self.start_time = start_time
         self.distance = 0
         self.arrive_time = []
@@ -26,28 +26,6 @@ class Car():
             print "Car #%s has reached its destination." % self.car_id
             return False
         return True
-
-
-class Light():
-    def __init__(self, red_period, green_period, light=0):
-        self.red_period = int(red_period)
-        self.green_period = int(green_period)
-        self.light = light
-
-    def clone(self):
-        return Light(self.red_period, self.green_period, self.light)
-
-    def reverse_clone(self):
-        return Light(self.green_period, self.red_period, 1 - self.light)
-
-    def update_status(self, time):
-        if self.light:
-            if self.green_period <= time:
-                self.light = 0
-        else:
-            if self.red_period <= time:
-                self.light = 1
-
 
 class Lane:
     def __init__(self, link, sublink, type, capacity):
