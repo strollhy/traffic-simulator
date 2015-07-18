@@ -9,8 +9,8 @@ class MainLink():
         self.link_id = data[0]
         self.length = float(data[1]) if data[1] else 0
         self.num_of_lanes = int(data[2])
-        self.max_speed = int(data[3])
-        self.min_speed = int(data[4])
+        self.min_speed = int(data[3])
+        self.max_speed = int(data[4])
         self.jam_density = int(data[5])
 
         self.left_link = None
@@ -48,7 +48,8 @@ class MainLink():
         rho_jam = 220.0
         alpha = 1.2
         beta = 1.8
-        self.avg_speed = v_min + (v_min+v_free) * (1-(rho/rho_jam)**alpha)**beta
+        self.avg_speed = v_min + (v_free + v_min) * (1-(rho/rho_jam)**alpha)**beta
+        print "Updating speed on #%s to %f" % (self.link_id, self.avg_speed)
 
     def print_status(self):
         pass
@@ -147,12 +148,14 @@ class SubLink2(SubLink):
 
     def update_allowed_merge(self):
         for k in self.allowed_merge.keys():
-            if self.lanes[0].type == "LTR":
-                blockage_factor = 0
+            if self.link.sublink3.single_lane:
+                self.allowed_merge['T'] = 5
+                self.allowed_merge['L'] = 3
+                self.allowed_merge['R'] = 3
             else:
                 blockage_factor = self.cal_blockage_factor(k)
-            self.allowed_merge[k] = min(self.link.sublink3.empty_space(k),
-                                        max(1 - blockage_factor, 0) * self.get_car_num())
+                self.allowed_merge[k] = min(self.link.sublink3.empty_space(k),
+                                            max(1 - blockage_factor, 0) * self.get_car_num())
 
     def update_cars(self):
         self.update_allowed_merge()
@@ -185,11 +188,11 @@ class SubLink3(SubLink):
         self.signals = {"T": [], "L": [], "R": []}
         self.time = 0
         self.lanes = []
+        self.single_lane = False
         caps = [int(c) for c in caps]
 
         if sum(caps) == 5:
-            self.lanes.append(Lane(link, self, 'LTR', max(caps)))
-            return
+            self.single_lane = True
 
         if caps[0] == "5":
             self.lanes.append(Lane(link, self, 'LT', caps[0]))
@@ -222,6 +225,8 @@ class SubLink3(SubLink):
         lanes = sorted(self.lanes, key=lambda x: x.empty_space(), reverse=True)
         for lane in lanes:
             if heading_direction in lane.type and lane.empty_space():
+                return lane
+            if self.single_lane and lane.empty_space():
                 return lane
         return None
 
