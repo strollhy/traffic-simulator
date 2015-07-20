@@ -32,12 +32,11 @@ class MainLink():
         self.cal_velocity()
 
     def cal_density(self):
-        x = self.sublink1.get_car_num() + self.sublink2.get_car_num()
-        N = x + self.sublink3.get_car_num()
+        x = self.sublink2.get_car_num() + self.sublink3.get_car_num()
+        N = x + self.sublink1.get_car_num()
         n = self.num_of_lanes
         l = self.length
         rho_jam = 220.0
-        # TODO double check that N-x is really counting sublink 3
         rho = (N-x)/(n*l-x/rho_jam + .1)
         return rho
 
@@ -48,7 +47,7 @@ class MainLink():
         rho_jam = 220.0
         alpha = 1.2
         beta = 1.8
-        self.avg_speed = v_min + (v_free + v_min) * (1-(rho/rho_jam)**alpha)**beta
+        self.avg_speed = v_min + (v_free - v_min) * (1-(rho/rho_jam)**alpha)**beta
         print "Updating speed on #%s to %f" % (self.link_id, self.avg_speed)
 
     def print_status(self):
