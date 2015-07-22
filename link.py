@@ -41,6 +41,7 @@ class MainLink():
         return rho
 
     def cal_velocity(self):
+        if self.length == 0: return
         v_min = self.min_speed
         v_free = self.max_speed
         rho = self.cal_density()
@@ -48,7 +49,7 @@ class MainLink():
         alpha = 1.2
         beta = 1.8
         self.avg_speed = v_min + (v_free - v_min) * (1-(rho/rho_jam)**alpha)**beta
-        print "Updating speed on #%s to %f" % (self.link_id, self.avg_speed)
+        # print "Updating speed on #%s to %f" % (self.link_id, self.avg_speed)
 
     def print_status(self):
         pass
@@ -165,7 +166,9 @@ class SubLink2(SubLink):
                 if len(lane) > 0:
                     car = lane[0]
                     if car.is_blocked is False:
-                        if self.allowed_merge[car.heading_direction()] > 0 and self.link.sublink3.add_car(car):
+                        heading_direction = car.heading_direction()
+                        if heading_direction in self.allowed_merge and self.allowed_merge[car.heading_direction()] > 0 \
+                                and self.link.sublink3.add_car(car):
                             lane.pop(0)
                             moved_car += 1
                             self.allowed_merge[car.heading_direction()] -= 1

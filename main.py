@@ -4,30 +4,7 @@ from traffic import *
 from link import *
 from rule import Rule
 
-######################################################
-# car_data = [["1", "1,2,3", "0"],
-#             ["2", "2,3", "1"],
-#             ["3", "1,2", "2"],
-#             ["4", "1,2,3", "1"],
-#             ["5", "1,2,3", "2"],
-#             ["6", "1,2,3", "3"],
-#             ["7", "2,3", "2"],
-#             ["8", "1,2,3", "3"],
-#             ["9", "1,2,3", "3"],
-#             ["10", "1,2,3", "3"],
-#             ["11", "1,2,3", "3"],
-#             ]
-# link_data = [["1000", "4", "20", "50", "220", "4", "5", "5"],
-#              ["800", "4", "20", "50", "220", "4", "5", "5"],
-#              ["900", "4", "20", "50", "220", "4", "5", "5"]]
-# link_link_data = [["1", "2", "0", "0"],
-#                   ["2", "0", "0", "3"],
-#                   ["3", "0", "0", "0"]]
-# light_data = [["1", "2,3", "2,3", "2,3"],
-#               ["2", "2,3", "3,4", "5,1"],
-#               ["3", "2,3", "4,3", "1,5"]]
-
-######################################################
+data_source = "data"
 
 
 class Simulator:
@@ -54,7 +31,7 @@ class Simulator:
 
     def setup_cars(self):
         # Setup cars
-        f = open('data/car.csv')
+        f = open(data_source + '/car.csv')
         f.readline()
         for line in f:
             data = line.strip().split(',')
@@ -65,37 +42,39 @@ class Simulator:
 
     def setup_links(self):
         # Setup links
-        f = open('data/link.csv')
+        f = open(data_source + '/link.csv')
         f.readline()
         for line in f:
             link_data = line.strip().split(',')
+            # if not link_data[1]: continue
             link_id = link_data[0]
             self.links[link_id] = MainLink(*link_data)
 
         # Setup link connections
-        f = open('data/link2link.csv')
+        f = open(data_source + '/link2link.csv')
         f.readline()
         for line in f:
             link_link_data = line.strip().split(',')
             link_id = link_link_data[0]
+            if link_id not in self.links: continue
 
-            if link_link_data[1] != '0':
+            if link_link_data[1] != '0' and link_link_data[1] in self.links:
                 self.links[link_id].left_link = self.links[link_link_data[1]]
                 self.links[link_link_data[1]].right_link = self.links[link_id]
-            if link_link_data[2] != '0':
+            if link_link_data[2] != '0' and link_link_data[2] in self.links:
                 self.links[link_id].right_link = self.links[link_link_data[2]]
                 self.links[link_link_data[2]].left_link = self.links[link_id]
-            if link_link_data[3] != '0':
+            if link_link_data[3] != '0' and link_link_data[3] in self.links:
                 self.links[link_id].through_link = self.links[link_link_data[3]]
                 self.links[link_link_data[3]].through_link = self.links[link_id]
 
     def setup_lights(self):
         # Setup nodes
-        f = open('data/signal.csv')
+        f = open(data_source + '/signal.csv')
         f.readline()
         for line in f:
             data = line.strip().split(',')
-            link_id = data[0]
+            link_id = data[0] if data[0] else link_id
             direction = data[1]
             if direction in ["T", "R", "L"]:
                 self.links[link_id].sublink3.setup_signal(direction, data[2:])

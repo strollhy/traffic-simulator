@@ -8,7 +8,7 @@ class Car():
         self.start_time = start_time
         self.distance = 0
         self.arrive_time = []
-        self.step = -1
+        self.step = 0
         self.direction = []
         self.is_blocked = False
 
@@ -26,6 +26,7 @@ class Car():
             print "Car #%s has reached its destination." % self.car_id
             return False
         return True
+
 
 class Lane:
     def __init__(self, link, sublink, type, capacity):
