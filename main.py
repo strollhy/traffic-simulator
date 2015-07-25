@@ -27,7 +27,6 @@ class Simulator:
         self.update_time()
         self.update_cars()
         self.update_links()
-        self.time += 1
 
     def setup_cars(self):
         # Setup cars
@@ -38,7 +37,7 @@ class Simulator:
             car = Car(*data)
             car.get_directions(self.get_directions)
             self.cars[data[0]] = car
-            self.links[car.path[0]].sublink1.add_car(car)
+            # self.links[car.path[0]].sublink1.add_car(car)
 
     def setup_links(self):
         # Setup links
@@ -60,17 +59,17 @@ class Simulator:
 
             if link_link_data[1] != '0' and link_link_data[1] in self.links:
                 self.links[link_id].left_link = self.links[link_link_data[1]]
-                self.links[link_link_data[1]].right_link = self.links[link_id]
+                # self.links[link_link_data[1]].right_link = self.links[link_id]
             if link_link_data[2] != '0' and link_link_data[2] in self.links:
                 self.links[link_id].right_link = self.links[link_link_data[2]]
-                self.links[link_link_data[2]].left_link = self.links[link_id]
+                # self.links[link_link_data[2]].left_link = self.links[link_id]
             if link_link_data[3] != '0' and link_link_data[3] in self.links:
                 self.links[link_id].through_link = self.links[link_link_data[3]]
-                self.links[link_link_data[3]].through_link = self.links[link_id]
+                # self.links[link_link_data[3]].through_link = self.links[link_id]
 
     def setup_lights(self):
         # Setup nodes
-        f = open(data_source + '/signal.csv')
+        f = open(data_source + '/signal_2.csv')
         f.readline()
         for line in f:
             data = line.strip().split(',')
@@ -90,9 +89,18 @@ class Simulator:
         if link.through_link and link.through_link.link_id == next_link_id:
             return "T"
 
+        raise Exception("Incorrect connection between %s->%s" % (link_id, next_link_id))
+
     def update_time(self):
         for link in self.links.values():
             link.sublink3.update_time(self.time)
+
+        for car in self.cars.values():
+            if self.time == car.start_time:
+                link_id = car.path[0]
+                self.links[link_id].sublink1.add_car(car)
+
+        self.time += 1
 
     def update_cars(self):
         self.rule.update_cars()
@@ -103,6 +111,11 @@ class Simulator:
     # outputs
     def print_status(self):
         print "==== Time Stamp %ds =====" % (self.time * 10)
+        if self.time == 179:
+            for car in self.cars.values():
+                if car.step < len(car.path) - 1:
+                    # print "Car #%s is still running" % car.car_id
+                    pass
         # for link_id in sorted(self.links.keys()):
         #     link = self.links[link_id]
         #     link.sublink3.print_lights()

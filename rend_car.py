@@ -5,7 +5,7 @@ from main import data_source
 
 od_pairs = {}
 time_interval = 100
-car_num_eff = 1
+car_num_eff = .17
 
 
 def rend_car():
@@ -32,7 +32,7 @@ def rend_car():
             car_num = data[1] if data[1] else car_num
             path = data[2]
             distance = data[3]
-            for _ in xrange(int(car_num) * car_num_eff/len(path_group)):
+            for _ in xrange(int(int(car_num) * car_num_eff/len(path_group))):
                 start_time = random.randint(0, 100)
                 fout.write("%d,%d,%s\n" % (car_id, start_time, path))
                 car_id += 1
