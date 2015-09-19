@@ -1,17 +1,16 @@
 __author__ = 'hongyusong'
 
 import random
-from main import data_source
 
 od_pairs = {}
 time_interval = 100
-car_num_eff = .17
+car_num_eff = .017
 
 
 def rend_car():
-    fin = open(data_source + '/path.csv')
+    fin = open('path.csv')
     fin.readline()
-    fout = open(data_source + '/car.csv', 'w')
+    fout = open('car.csv', 'w')
     fout.write('Car id,Start time,path' + "\n")
 
     for line in fin:

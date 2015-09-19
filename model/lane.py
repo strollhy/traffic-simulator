@@ -1,0 +1,19 @@
+__author__ = 'hongyusong'
+
+
+class Lane:
+    def __init__(self, link, sublink, type, capacity):
+        self.link = link
+        self.sublink = sublink
+        self.type = type
+        self.capacity = capacity
+        self.cars = []
+
+    def add_car(self, car):
+        self.cars.append(car)
+
+    def remove_car(self):
+        return self.cars.pop(0)
+
+    def empty_space(self):
+        return self.capacity - len(self.cars)
