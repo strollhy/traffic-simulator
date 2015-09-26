@@ -2,10 +2,9 @@ __author__ = 'hongyusong'
 
 
 class Lane:
-    def __init__(self, link, sublink, type, capacity):
+    def __init__(self, link, sublink, capacity):
         self.link = link
         self.sublink = sublink
-        self.type = type
         self.capacity = capacity
         self.cars = []
 

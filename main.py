@@ -38,6 +38,7 @@ class Simulator(Observer):
         for line in f:
             data = line.strip().split(',')
             car = Car(*data)
+            car.register_observer(self)
             self.cars[data[0]] = car
 
     def setup_links(self):
@@ -56,14 +57,15 @@ class Simulator(Observer):
         for line in f:
             link_link_data = line.strip().split(',')
             link_id = link_link_data[0]
-            if link_id not in self.links: continue
+            if link_id not in self.links:
+                continue
 
             if link_link_data[1] != '0' and link_link_data[1] in self.links:
-                self.links[link_id].left_link = self.links[link_link_data[1]]
+                self.links[link_id].next_link["L"] = self.links[link_link_data[1]]
             if link_link_data[2] != '0' and link_link_data[2] in self.links:
-                self.links[link_id].right_link = self.links[link_link_data[2]]
+                self.links[link_id].next_link["R"] = self.links[link_link_data[2]]
             if link_link_data[3] != '0' and link_link_data[3] in self.links:
-                self.links[link_id].through_link = self.links[link_link_data[3]]
+                self.links[link_id].next_link["T"] = self.links[link_link_data[3]]
 
     def setup_lights(self):
         # Setup nodes
@@ -90,8 +92,8 @@ class Simulator(Observer):
 
     def release_cars(self):
         for link in self.links.values():
-            link.sublink3.release_cars()
-            link.sublink2.release_cars()
+            link.sublink3.release_cars(5)
+            link.sublink2.release_cars(5)
             link.sublink1.release_cars()
 
     def update_links(self):
