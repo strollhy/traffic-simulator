@@ -197,7 +197,6 @@ class SubLink2(SubLink):
         :return:
         """
         self.update_allowed_merge()
-
         for _ in xrange(car_per_line):
             waiting_queue = []
 
@@ -219,9 +218,11 @@ class SubLink2(SubLink):
                         # if there is a potential lane available, put the car to waiting list
                         waiting_queue.append([lane_number, potential_lanes])
                     else:
-                        car.set_blocked()
+                        car.set_blocked("No space left on merging zone.")
                 else:
-                    car.set_blocked()
+                    if car.car_id == '1573':
+                        pass
+                    car.set_blocked("Merging not allowed.")
 
             # Provide one more chance to move car to potential lanes
             for elem in waiting_queue:
@@ -260,6 +261,12 @@ class SubLink3(SubLink):
         self.car_num = 0
         self.capacity = 0
         self.init_lanes(capacities)
+
+    def get_car_num(self):
+        return self.car_num
+
+    def setup_signal(self, group, data):
+        self.signals[group] = data
 
     def init_lanes(self, capacities):
         """
@@ -365,7 +372,7 @@ class SubLink3(SubLink):
                         lane.cars.pop(0)
                         self.link.next_link[car.lane_group].add_car(car)
                     else:
-                        car.is_blocked = True
+                        car.set_blocked("No space left on next link")
 
         # after release reset block flag
         for lanes in self.lanes.values():
@@ -373,8 +380,62 @@ class SubLink3(SubLink):
                 for car in lane.cars:
                     car.is_blocked = False
 
-    def setup_signal(self, group, data):
-        self.signals[group] = data
+    def group_cars(self):
+        """
+        Group cars to seven types
+        :return: array of types count
+        """
+        # seven types
+        types = [0 for _ in xrange(7)]
 
-    def get_car_num(self):
-        return self.car_num
+        # For left lane group
+        for lane in self.lanes["L"]:
+            index = 0
+
+            # type I
+            while index < len(lane.cars):
+                if lane.cars[index].lane_group == "T":
+                    types[0] += 1
+                else:
+                    break
+                index += 1
+
+            # type II
+            while index < len(lane.cars):
+                if lane.cars[index].lane_group == "L":
+                    types[1] += 1
+                else:
+                    break
+                index += 1
+
+            # type III
+            types[2] = len(lane.cars[index:])
+
+        # For right lane group
+        for lane in self.lanes["R"]:
+            index = 0
+
+            # type I
+            while index < len(lane.cars):
+                if lane.cars[index].lane_group == "T":
+                    types[3] += 1
+                else:
+                    break
+                index += 1
+
+            # type II
+            while index < len(lane.cars):
+                if lane.cars[index].lane_group == "R":
+                    types[4] += 1
+                else:
+                    break
+                index += 1
+
+            # type III
+            types[5] = len(lane.cars[index:])
+
+        # For through lane group
+        for lane in self.lanes["T"]:
+            types[6] += len(lane.cars)
+
+        return types

@@ -26,7 +26,7 @@ class Car(Observable):
             return None
         return self.path[0]
 
-    def set_blocked(self):
+    def set_blocked(self, msg = ""):
         self.is_blocked = True
-        self.notify_observers("Car #%s is blocked on %s, %s"
-                              % (self.car_id, self.get_destination(), self.lane_group))
+        self.notify_observers("Car #%s is blocked to %s, %s. {%s}"
+                              % (self.car_id, self.get_destination(), self.lane_group, msg))
