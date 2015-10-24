@@ -13,6 +13,7 @@ class Car(Observable):
         self.arrive_time = 0
         self.lane_group = None
         self.is_blocked = False
+        self.blocked_count = 0
 
     def update_path(self):
         if self.path:
@@ -28,5 +29,10 @@ class Car(Observable):
 
     def set_blocked(self, msg = ""):
         self.is_blocked = True
+        self.blocked_count += 1
         self.notify_observers("Car #%s is blocked to %s, %s. {%s}"
                               % (self.car_id, self.get_destination(), self.lane_group, msg))
+
+    def unset_blocked(self):
+        self.is_blocked = False
+        self.blocked_count = 0

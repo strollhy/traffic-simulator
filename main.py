@@ -55,17 +55,19 @@ class Simulator(Observer):
         f = open(data_source + '/link2link.csv')
         f.readline()
         for line in f:
-            link_link_data = line.strip().split(',')
-            link_id = link_link_data[0]
+            link2link = line.strip().split(',')
+            link_id = link2link[0]
             if link_id not in self.links:
                 continue
 
-            if link_link_data[1] != '0' and link_link_data[1] in self.links:
-                self.links[link_id].next_link["L"] = self.links[link_link_data[1]]
-            if link_link_data[2] != '0' and link_link_data[2] in self.links:
-                self.links[link_id].next_link["R"] = self.links[link_link_data[2]]
-            if link_link_data[3] != '0' and link_link_data[3] in self.links:
-                self.links[link_id].next_link["T"] = self.links[link_link_data[3]]
+            if link2link[1] != '0' and link2link[1] in self.links:
+                self.links[link_id].next_link["L"] = self.links[link2link[1]]
+            if link2link[2] != '0' and link2link[2] in self.links:
+                self.links[link_id].next_link["R"] = self.links[link2link[2]]
+            if link2link[3] != '0' and link2link[3] in self.links:
+                self.links[link_id].next_link["T"] = self.links[link2link[3]]
+            if link2link[4] != '0' and link2link[4] in self.links:
+                self.links[link_id].conflict_link = self.links[link2link[3]]
 
     def setup_lights(self):
         # Setup nodes
@@ -93,7 +95,11 @@ class Simulator(Observer):
     def release_cars(self):
         for link in self.links.values():
             link.sublink3.release_cars(5)
+
+        for link in self.links.values():
             link.sublink2.release_cars(5)
+
+        for link in self.links.values():
             link.sublink1.release_cars()
 
     def update_links(self):

@@ -20,6 +20,7 @@ class MainLink(Observable):
         self.time = 0
 
         self.next_link = {"T": None, "L": None, "R": None}
+        self.conflict_link = None
 
         self.num_of_cars = 0
         self.capacity = 0
@@ -97,7 +98,7 @@ class MainLink(Observable):
 class SubLink(object):
     def __init__(self, link, lane_num):
         self.link = link
-        self.lanes = [[] for i in xrange(lane_num)]
+        self.lanes = [[] for _ in xrange(lane_num)]
 
     def get_car_num(self):
         return sum([len(l) for l in self.lanes])
@@ -218,10 +219,8 @@ class SubLink2(SubLink):
                         # if there is a potential lane available, put the car to waiting list
                         waiting_queue.append([lane_number, potential_lanes])
                     else:
-                        car.set_blocked("No space left on merging zone.")
+                        car.set_blocked("No space left on merging zone. %d" % (self.link.sublink3.group_capacity(car.lane_group)))
                 else:
-                    if car.car_id == '1573':
-                        pass
                     car.set_blocked("Merging not allowed.")
 
             # Provide one more chance to move car to potential lanes
@@ -235,7 +234,7 @@ class SubLink2(SubLink):
         # TODO put this somewhere else
         for lane in self.lanes:
             for car in lane:
-                car.is_blocked = False
+                car.unset_blocked()
 
     def __release_car_to_next(self, lane_number, next_lane):
         """
@@ -302,6 +301,9 @@ class SubLink3(SubLink):
             if capacities[-1] == 5:
                 self.lanes["T"].append(right_lane)
 
+    def group_capacity(self, group):
+        return sum([lane.empty_space() for lane in self.lanes[group]])
+
     def find_available_lanes(self, group, lane_number):
         """
         Find empty space for given lane group
@@ -343,7 +345,7 @@ class SubLink3(SubLink):
         self.car_num += 1
 
     def remove_car(self, lane_group, lane_number):
-        self.lanes[lane_group][lane_number].pop()
+        self.lanes[lane_group][lane_number].cars.pop(0)
         self.car_num -= 1
 
     def release_cars(self, cars_per_lane):
@@ -355,13 +357,15 @@ class SubLink3(SubLink):
         """
         # for each lane group
         for _ in xrange(cars_per_lane):
-            for group in self.lanes:
-                if not (len(self.signals[group]) == 0 or self.signals[group][self.link.time] == '1'):
+            for lane_group in self.lanes:
+                if not (len(self.signals[lane_group]) == 0 or self.signals[lane_group][self.link.time] == '1'):
                     # skip if red light
                     continue
 
                 # try to release cars
-                for lane in self.lanes[group]:
+                for lane_number in xrange(len(self.lanes[lane_group])):
+                    lane = self.lanes[lane_group][lane_number]
+
                     if not lane.cars or lane.cars[0].is_blocked:
                         continue
 
@@ -369,7 +373,7 @@ class SubLink3(SubLink):
                     if self.link.next_link[car.lane_group].get_capacity() > 0:
                         self.link.notify_observers("Car #%s %s turn to Link #%s" %
                                                    (car.car_id, car.lane_group, self.link.next_link[car.lane_group].link_id))
-                        lane.cars.pop(0)
+                        self.remove_car(lane_group, lane_number)
                         self.link.next_link[car.lane_group].add_car(car)
                     else:
                         car.set_blocked("No space left on next link")
@@ -378,7 +382,7 @@ class SubLink3(SubLink):
         for lanes in self.lanes.values():
             for lane in lanes:
                 for car in lane.cars:
-                    car.is_blocked = False
+                    car.unset_blocked()
 
     def group_cars(self):
         """

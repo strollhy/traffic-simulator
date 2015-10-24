@@ -4,7 +4,7 @@ import random
 
 od_pairs = {}
 time_interval = 100
-car_num_eff = .017
+car_num_eff = .17
 
 
 def rend_car():
