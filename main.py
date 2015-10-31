@@ -94,13 +94,10 @@ class Simulator(Observer):
 
     def release_cars(self):
         for link in self.links.values():
-            link.sublink3.release_cars(5)
+            link.release_cars()
 
         for link in self.links.values():
-            link.sublink2.release_cars(5)
-
-        for link in self.links.values():
-            link.sublink1.release_cars()
+            link.post_release()
 
     def update_links(self):
         for link in self.links.values():
