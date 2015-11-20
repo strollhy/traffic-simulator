@@ -96,6 +96,7 @@ class Simulator(Observer):
         for link in self.links.values():
             link.release_cars()
 
+        # reset link status after release
         for link in self.links.values():
             link.post_release()
 
@@ -106,9 +107,6 @@ class Simulator(Observer):
     # outputs
     def print_status(self):
         print "==== Time Stamp %ds =====" % (self.time * 10)
-        # for link_id in sorted(self.links.keys()):
-        #     link = self.links[link_id]
-        #     link.sublink3.print_lights()
 
 
 if __name__ == '__main__':

@@ -35,4 +35,3 @@ class Car(Observable):
 
     def unset_blocked(self):
         self.is_blocked = False
-        self.blocked_count = 0

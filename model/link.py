@@ -95,9 +95,9 @@ class MainLink(Observable):
         self.avg_speed = v_min + (v_free - v_min) * (1-(rho/rho_jam)**alpha)**beta
 
     def release_cars(self):
-        self.sublink3.release_cars(5)
-        self.sublink2.release_cars(5)
         self.sublink1.release_cars()
+        self.sublink2.release_cars(10)
+        self.sublink3.release_cars()
 
     def post_release(self):
         self.sublink3.post_release()
@@ -206,40 +206,27 @@ class SubLink2(SubLink):
         :return:
         """
         self.update_allowed_merge()
-        for _ in xrange(car_per_line):
-            waiting_queue = []
 
-            for lane_number in xrange(len(self.lanes)):
+        for _ in xrange(car_per_line):
+            for lane_number, lane in enumerate(self.lanes):
                 # skip if either lane is empty or first car is block
-                if not self.lanes[lane_number] or self.lanes[lane_number][0].is_blocked:
+                if not lane or lane[0].is_blocked:
                     continue
 
-                lane = self.lanes[lane_number]
                 car = lane[0]
-
                 # if allow merged on this lane group and also find an empty space
                 if self.allowed_merge[car.lane_group] > 0:
-                    available_lane, potential_lanes = self.link.sublink3.find_available_lanes(car.lane_group, lane_number)
+                    available_lane = self.link.sublink3.find_available_lanes(car.lane_group, lane_number)
                     if available_lane:
                         # if there is a lane directly accessible, then release the car
                         self.__release_car_to_next(lane_number, available_lane[0])
-                    elif potential_lanes:
-                        # if there is a potential lane available, put the car to waiting list
-                        waiting_queue.append([lane_number, potential_lanes])
                     else:
-                        car.set_blocked("No space left on merging zone. %d" % (self.link.sublink3.group_capacity(car.lane_group)))
+                        car.set_blocked("No space left on merging zone. %d"
+                                        % (self.link.sublink3.group_capacity(car.lane_group)))
                 else:
                     car.set_blocked("Merging not allowed.")
 
-            # Provide one more chance to move car to potential lanes
-            for elem in waiting_queue:
-                for lane in elem[1]:
-                    if lane.empty_space():
-                        self.__release_car_to_next(elem[0], lane)
-                        break
-
         # reset car status for next time stamp
-        # TODO put this somewhere else
         for lane in self.lanes:
             for car in lane:
                 car.unset_blocked()
@@ -267,8 +254,12 @@ class SubLink3(SubLink):
         self.single_lane = False
         self.car_num = 0
         self.capacity = 0
-        self.released = False   # indicate whether released or not for this timestamp
+        self.released = False   # indicate whether released or not for this time stamp
         self.init_lanes(capacities)
+
+        self.pT, self.pL = 1.6, 2.4
+        self.headway = [2.98, 2.59, 2.13, 1.91, 1.86, 1.65]
+        self.pedestrian_time = 2
 
     def get_car_num(self):
         return self.car_num
@@ -322,24 +313,14 @@ class SubLink3(SubLink):
         :return: list of Lane
         """
         available_lanes = []      # lanes that can be merged to directly
-        potential_lanes = []      # lanes that need to wait on other cars
 
         if group == "T":
-            # find empty spot at front and near the lane
-            # if lane is merging, pick the nearest lane as primary lane
-            lane_number = min(lane_number, len(self.lanes[group]) - 1)
-            available_lanes.append(self.lanes[group][lane_number])
-
-            # find secondary lanes, in case primary lane is full
-            if 0 < lane_number:
-                potential_lanes.append(self.lanes[group][lane_number-1])
-            if lane_number < len(self.lanes[group]) - 1:
-                potential_lanes.append(self.lanes[group][lane_number+1])
+            available_lanes = sorted([lane for lane in self.lanes[group] if lane.empty_space()],
+                                     key=lambda x: x.empty_space(),
+                                     reverse=True)
         else:
-            available_lanes = self.lanes[group]
-
-        return [lane for lane in available_lanes if lane.empty_space()], \
-               [lane for lane in potential_lanes if lane.empty_space()]
+            available_lanes = [lane for lane in self.lanes[group] if lane.empty_space()]
+        return available_lanes
 
     def add_car(self, car, lane):
         """
@@ -357,76 +338,115 @@ class SubLink3(SubLink):
         self.lanes[lane_group][lane_number].cars.pop(0)
         self.car_num -= 1
 
-    def release_cars(self, cars_per_lane):
-        """
-        Release cars to next link
-
-        :param cars_per_lane: allowed car numbers can be released each time
-        :return:
-        """
-        # skip if already released
-        if self.released:
-            return
-
-        # for left lane group
-        self.release_left_group(cars_per_lane)
-        for _ in xrange(cars_per_lane):
-            self.release_through_group()
-            self.release_right_group()
-
     def is_red_light(self, lane_group):
         return not (len(self.signals[lane_group]) == 0 or self.signals[lane_group][self.link.time] == '1')
 
-    def release_left_group(self, cars_per_lane):
-        # skip on read light or no left link exists
-        if self.is_red_light("L"):
+    def release_cars(self):
+        """
+        Release cars to next link
+
+        :return:
+        """
+        # skip if already released
+        if not self.released:
+            self.release_left_group()
+        self.release_group("T")
+        self.release_group("R")
+
+    def release_group(self, lane_group):
+        if self.is_red_light(lane_group):
+            # skip if red light
+            for lane in self.lanes[lane_group]:
+                lane.elapsed_time = 0
             return
 
-        conflict_link = self.link.conflict_link
-        if not conflict_link:
-            for _ in xrange(cars_per_lane):
-                self.release_group("L")
-            return
-
-        for _ in xrange(cars_per_lane):
-            # predict collision
-            # TODO assuming only conflict on through & left
-            conflict_lane = conflict_link.sublink3.lanes["L"][0].cars
-            current_lane = self.lanes["L"][0].cars
-
-            if not conflict_lane:
-                self.release_group("L")
-            elif not current_lane:
-                conflict_link.sublink3.release_group("L")
-            else:
-                # if both have cars, need to predict conflict
-                car1, car2 = current_lane[0], conflict_lane[0]
-                if self.has_conflict(car1, conflict_lane):
-                    # if car 1 is blocked, then just release car 2
-                    conflict_link.sublink3.release_car(car2, "L", 0)
-                else:
-                    if not self.has_conflict(car2, current_lane):
-                        conflict_link.sublink3.release_car(car2, "L", 0)
-                    self.release_car(car1, "L", 0)
-
-    def has_conflict(self, car, conflict_lane):
-        if car.lane_group == "L":
-            for i, conflict_car in enumerate(conflict_lane):
-                if conflict_car.lane_group == "T":
-                    if self.predict_conflict(i):
-                        self.link.notify_observers("Car #%s waits for Car #%s to move" % (car.car_id, conflict_car.car_id))
-                        return True
+        # try to release cars
+        for lane_number, lane in enumerate(self.lanes[lane_group]):
+            car_cnt = 0
+            while lane.cars and not lane.cars[0].is_blocked and lane.elapsed_time <= 10 - self.headway[-1]:
+                # consider pedestrian
+                if lane.cars[0].lane_group == "R":
+                    if car_cnt == 0:
+                        lane.elapsed_time += self.pedestrian_time
                     else:
-                        return False
-        return False
+                        car_cnt += 1
 
-    def predict_conflict(self, i):
-        # TODO confirm coefficient here
-        pT, pL = 1.6, 2.4
-        coefficients = [2.98, 2.59, 2.13, 1.91, 1.86, 1.65]
-        i = min(i, len(coefficients) - 1)
+                self.release_car(lane.cars[0], lane_group, lane_number)
+                lane.elapsed_time += self.headway[-1]
 
-        return coefficients[i] + pT / 2 < pL / 2
+            if lane.elapsed_time > 10 - self.headway[-1]:
+                lane.elapsed_time -= self.headway[-1]
+
+        # after release reset block flag
+        for lane in self.lanes[lane_group]:
+            for car in lane.cars:
+                car.unset_blocked()
+
+    def release_left_group(self):
+        current_lane = self.lanes["L"][0]
+        conflict_link = self.link.conflict_link
+
+        # TODO check on which light?
+        skip_current = self.is_red_light("L")
+        skip_conflict = not conflict_link or conflict_link.sublink3.is_red_light("L")
+
+        if skip_current and skip_conflict:
+            for lane in self.lanes["L"]:
+                lane.elapsed_time = 0
+
+            if conflict_link:
+                for lane in self.lanes["L"]:
+                    lane.elapsed_time = 0
+        elif skip_current:
+            conflict_link.sublink3.release_group("L")
+        elif skip_conflict:
+            self.release_group("L")
+        else:
+            conflict_lane = conflict_link.sublink3.lanes["L"][0]
+
+            while current_lane.elapsed_time <= 10 - self.headway[-1] and \
+                    conflict_lane.elapsed_time <= 10 - self.headway[-1]:
+                # predict collision
+                # if both have cars, need to predict conflict
+                if not current_lane.cars or current_lane.elapsed_time > 10 - self.headway[-1]:
+                    conflict_link.sublink3.release_group("L")
+                    break
+                elif not conflict_lane.cars or conflict_lane.elapsed_time > 10 - self.headway[-1]:
+                    self.release_group("L")
+                    break
+                else:
+                    car1, car2 = current_lane.cars[0], conflict_lane.cars[0]
+                    has_conflict, release_time = self.get_conflict(car1, conflict_lane)
+                    if has_conflict or car1.is_blocked:
+                        # if car 1 is blocked, then just release car 2
+                        conflict_link.sublink3.release_car(car2, "L", 0)
+                        current_lane.elapsed_time += release_time
+                        conflict_lane.elapsed_time += release_time
+                    else:
+                        self.release_car(car1, "L", 0)
+                        current_lane.elapsed_time += release_time
+                        conflict_lane.elapsed_time += release_time
+
+                print current_lane.elapsed_time, conflict_lane.elapsed_time
+
+        # Mark as visited
+        # TODO can we simplify this?
+        self.released = True
+        if conflict_link:
+            conflict_link.released = True
+
+    def get_conflict(self, car, conflict_lane):
+        release_time = self.pL if car.lane_group == "L" else self.pT
+        if car.lane_group == "L":
+            for i, conflict_car in enumerate(conflict_lane.cars):
+                if conflict_car.lane_group == "T":
+                    through_time = sum(self.headway[1:i+1])
+                    if through_time + self.pT / 2 < self.pL / 2:
+                        self.link.notify_observers("Car #%s waits for Car #%s to move" % (car.car_id, conflict_car.car_id))
+                        return True, through_time
+                    else:
+                        return False, release_time
+        return False, release_time
 
     def release_car(self, car, lane_group, lane_number):
         if self.link.next_link[car.lane_group].get_capacity() > 0:
@@ -436,38 +456,6 @@ class SubLink3(SubLink):
             self.link.next_link[car.lane_group].add_car(car)
         else:
             car.set_blocked("No space left on next link")
-
-    def release_through_group(self):
-        self.release_group("T")
-
-    def release_right_group(self):
-        self.release_group("R")
-
-    def release_group(self, lane_group):
-        if self.is_red_light(lane_group):
-            # skip if red light
-            return
-
-        # try to release cars
-        for lane_number in xrange(len(self.lanes[lane_group])):
-            lane = self.lanes[lane_group][lane_number]
-
-            if not lane.cars or lane.cars[0].is_blocked:
-                continue
-
-            car = lane.cars[0]
-            if self.link.next_link[car.lane_group].get_capacity() > 0:
-                self.link.notify_observers("Car #%s %s turn to Link #%s" %
-                                           (car.car_id, car.lane_group, self.link.next_link[car.lane_group].link_id))
-                self.remove_car(lane_group, lane_number)
-                self.link.next_link[car.lane_group].add_car(car)
-            else:
-                car.set_blocked("No space left on next link")
-
-        # after release reset block flag
-        for lane in self.lanes[lane_group]:
-            for car in lane.cars:
-                car.unset_blocked()
 
     def group_cars(self):
         """
