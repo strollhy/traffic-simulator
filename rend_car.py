@@ -8,9 +8,9 @@ car_num_eff = .17
 
 
 def rend_car():
-    fin = open('path.csv')
+    fin = open('data/path.csv')
     fin.readline()
-    fout = open('car.csv', 'w')
+    fout = open('data/car.csv', 'w')
     fout.write('Car id,Start time,path' + "\n")
 
     for line in fin:
