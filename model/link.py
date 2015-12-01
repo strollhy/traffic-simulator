@@ -427,8 +427,6 @@ class SubLink3(SubLink):
                         current_lane.elapsed_time += release_time
                         conflict_lane.elapsed_time += release_time
 
-                print current_lane.elapsed_time, conflict_lane.elapsed_time
-
         # Mark as visited
         # TODO can we simplify this?
         self.released = True

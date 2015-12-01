@@ -106,7 +106,8 @@ class Simulator(Observer):
 
     # outputs
     def print_status(self):
-        print "==== Time Stamp %ds =====" % (self.time * 10)
+        # print "==== Time Stamp %ds =====" % (self.time * 10)
+        pass
 
 
 if __name__ == '__main__':

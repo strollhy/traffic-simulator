@@ -19,8 +19,8 @@ class Observer(object):
         observable.register_observer(self)
 
     def notify(self, observable, *args, **kwargs):
-        print args
-
+        # print args
+        pass
 
 if __name__ == '__main__':
     subject = Observable()

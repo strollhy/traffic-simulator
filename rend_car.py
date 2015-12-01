@@ -8,7 +8,21 @@ car_num_eff = .17
 
 
 def rend_car():
-    fin = open('data/path.csv')
+    fin = open('data/allocation_path.csv')
+    fout = open('data/car.csv', 'w')
+    fout.write('Car id,Start time,path' + "\n")
+
+    car_id = 1
+    for line in fin:
+        path, car_num = line.strip().split(',')
+        for _ in xrange(int(car_num)):
+            start_time = random.randint(0, 100)
+            fout.write("%d,%d,%s\n" % (car_id, start_time, path))
+            car_id += 1
+
+
+def rend_car_old():
+    fin = open('data/old_path.csv')
     fin.readline()
     fout = open('data/car.csv', 'w')
     fout.write('Car id,Start time,path' + "\n")
