@@ -4,11 +4,11 @@ import random
 
 od_pairs = {}
 time_interval = 100
-car_num_eff = .17
+car_num_eff = .017
 
 
-def rend_car():
-    fin = open('data/allocation_path.csv')
+def rend_car(file_name):
+    fin = open(file_name)
     fout = open('data/car.csv', 'w')
     fout.write('Car id,Start time,path' + "\n")
 
@@ -16,10 +16,9 @@ def rend_car():
     for line in fin:
         path, car_num = line.strip().split(',')
         for _ in xrange(int(car_num)):
-            start_time = random.randint(0, 100)
+            start_time = random.randint(0, 180)
             fout.write("%d,%d,%s\n" % (car_id, start_time, path))
             car_id += 1
-
 
 def rend_car_old():
     fin = open('data/old_path.csv')
@@ -54,4 +53,4 @@ def rend_car_old():
     fout.close()
 
 if __name__ == '__main__':
-    rend_car()
+    rend_car('data/allocation_path.csv')

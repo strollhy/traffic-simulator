@@ -8,6 +8,8 @@ class Car(Observable):
         super(Car, self).__init__()
         self.car_id = car_id
         self.path = path.split("-")
+        self.path_id = path
+        self.od = (self.path[0], self.path[-1])
         self.start_time = int(start_time)
         self.distance = 0
         self.arrive_time = 0

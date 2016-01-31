@@ -4,11 +4,11 @@ import random
 
 from lane import Lane
 from observer import Observable
-f = open('data/density.txt', 'w')
+# f = open('data/density.txt', 'w')
 
 
 class MainLink(Observable):
-    def __init__(self, *data):
+    def __init__(self, simulator, *data):
         super(MainLink, self).__init__()
         self.link_id = data[0]
         self.length = float(data[1]) * 0.000189394 if data[1] else 200  # if no length is provided, assume infinite
@@ -18,6 +18,7 @@ class MainLink(Observable):
         self.max_speed = int(data[4])
         self.jam_density = int(data[5])
         self.time = 0
+        self.simulator = simulator
 
         self.next_link = {"T": None, "L": None, "R": None}
         self.conflict_link = None
@@ -48,6 +49,12 @@ class MainLink(Observable):
         # check car status
         if not car.get_destination():
             self.notify_observers("Car #%s reaches its destination" % car.car_id)
+
+            # store elapsed time
+            if car.od in self.simulator.paths and car.path_id in self.simulator.paths[car.od]:
+                self.simulator.paths[car.od][car.path_id].elapse_time += car.arrive_time - car.start_time
+            # print car.path_id, car.arrive_time - car.start_time
+            # print self.simulator.paths[car.od][car.path_id].elapse_time
             return
 
         # assign lane group to car
@@ -78,10 +85,10 @@ class MainLink(Observable):
         n = self.num_of_lanes
         l = self.length
         rho_jam = 220.0
-        rho = (N-x)/(n*l-x/rho_jam + .1)
-        f = open('data/density.txt', 'a')
-        f.write("%s,%d,%d,%d,%f,%f,%d,%d\n" % (self.link_id, N, x, n, l, rho, self.sublink2.pass_count, self.time))
-        f.close()
+        rho = (N-x)/(1 + n*l-x/rho_jam)
+        # f = open('data/density.txt', 'a')
+        # f.write("%s,%d,%d,%d,%f,%f,%d,%d\n" % (self.link_id, N, x, n, l, rho, self.sublink2.pass_count, self.time))
+        # f.close()
         return rho
 
     def cal_velocity(self):
@@ -95,9 +102,9 @@ class MainLink(Observable):
         self.avg_speed = v_min + (v_free - v_min) * (1-(rho/rho_jam)**alpha)**beta
 
     def release_cars(self):
-        self.sublink1.release_cars()
-        self.sublink2.release_cars(10)
         self.sublink3.release_cars()
+        self.sublink2.release_cars(10)
+        self.sublink1.release_cars()
 
     def post_release(self):
         self.sublink3.post_release()
@@ -114,7 +121,7 @@ class SubLink(object):
 
 class SubLink1(SubLink):
     def add_car(self, car):
-        car.update_arrive_time(self.link.time)
+        # car.update_arrive_time(self.link.time)
         direction = car.lane_group
         if direction == "T":
             i = random.randint(0, len(self.lanes) - 1)
@@ -129,7 +136,7 @@ class SubLink1(SubLink):
             for car in self.lanes[i]:
                 if self.link.sublink2.add_car(car, i):
                     self.lanes[i].remove(car)
-                    car.update_arrive_time(self.link.time)
+                    # car.update_arrive_time(self.link.time)
 
 
 class SubLink2(SubLink):
@@ -142,7 +149,7 @@ class SubLink2(SubLink):
         # if car reaches the zone
         if self.in_zone(car):
             self.lanes[self.get_to_lane(from_lane)].append(car)
-            car.update_arrive_time(self.link.time)
+            # car.update_arrive_time(self.link.time)
             return True
         else:
             return False
@@ -331,7 +338,7 @@ class SubLink3(SubLink):
         :return:
         """
         lane.add_car(car)
-        car.update_arrive_time(self.link.time)
+        # car.update_arrive_time(self.link.time)
         self.car_num += 1
 
     def remove_car(self, lane_group, lane_number):
@@ -404,8 +411,10 @@ class SubLink3(SubLink):
         else:
             conflict_lane = conflict_link.sublink3.lanes["L"][0]
 
-            while current_lane.elapsed_time <= 10 - self.headway[-1] and \
-                    conflict_lane.elapsed_time <= 10 - self.headway[-1]:
+            max_time = 0
+            while max_time < 100 and \
+                current_lane.elapsed_time <= 10 - self.headway[-1] and \
+                conflict_lane.elapsed_time <= 10 - self.headway[-1]:
                 # predict collision
                 # if both have cars, need to predict conflict
                 if not current_lane.cars or current_lane.elapsed_time > 10 - self.headway[-1]:
@@ -426,6 +435,8 @@ class SubLink3(SubLink):
                         self.release_car(car1, "L", 0)
                         current_lane.elapsed_time += release_time
                         conflict_lane.elapsed_time += release_time
+
+                # max_time += 1
 
         # Mark as visited
         # TODO can we simplify this?
@@ -451,6 +462,8 @@ class SubLink3(SubLink):
             self.link.notify_observers("Car #%s %s turn to Link #%s" %
                                        (car.car_id, car.lane_group, self.link.next_link[car.lane_group].link_id))
             self.remove_car(lane_group, lane_number)
+            # Keep car elapsed time
+            # self.link.passed_time += self.link.time - car.arrive_time;
             self.link.next_link[car.lane_group].add_car(car)
         else:
             car.set_blocked("No space left on next link")
