@@ -1,7 +1,7 @@
 import unittest
 from model.link import MainLink
 
-class TestMainLinkMethods(unittest.TestCase):
+class TestLink(unittest.TestCase):
     def setUp(self):
         self.link = MainLink()
 

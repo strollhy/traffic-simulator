@@ -5,7 +5,7 @@ LINKS = '../data/link.csv'
 
 class LinkReader(DataReader):
 
-    def __init__(self, path):
+    def __init__(self, path=LINKS):
         super(LinkReader, self).__init__(path)
 
         self._links = None
@@ -20,7 +20,7 @@ class LinkReader(DataReader):
 
 
 if __name__ == "__main__":
-    reader = LinkReader(LINKS)
+    reader = LinkReader()
 
     import pprint
     pprint.pprint(reader.links)

@@ -5,12 +5,16 @@ od_pairs = {}
 time_interval = 100
 car_num_eff = .17
 
+FIN = '../data/path.csv'
+FOUT = '../data/car.csv'
+HEADERS = 'car_id,start_time,path'
+
 
 def rend_car():
-    fin = open('data/path.csv')
+    fin = open(FIN)
     fin.readline()
-    fout = open('data/car.csv', 'w')
-    fout.write('Car id,Start time,path' + "\n")
+    fout = open(FOUT, 'w')
+    fout.write(HEADERS + "\n")
 
     for line in fin:
         data = line.strip().split(',')

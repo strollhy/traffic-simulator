@@ -39,7 +39,7 @@ class MainLink(Observable):
         """
         self.notify_observers("Car #%s reaches link #%s" % (car.car_id, self.link_id))
         # update car status
-        car.update_path()
+        car.move_on()
         car.update_arrive_time(self.time)
 
         # check car status
