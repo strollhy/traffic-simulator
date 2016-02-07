@@ -1,6 +1,6 @@
 __author__ = 'hongyusong'
 
-from observer import Observable
+from system.observer import Observable
 
 
 class Car(Observable):

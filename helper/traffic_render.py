@@ -1,6 +1,5 @@
-__author__ = 'hongyusong'
-
 import random
+
 
 od_pairs = {}
 time_interval = 100

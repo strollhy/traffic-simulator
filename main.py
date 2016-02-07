@@ -1,8 +1,9 @@
 __author__ = 'hongyusong'
 
 from model.link import *
+
 from model.car import *
-from model.observer import Observer
+from system.observer import Observer
 
 data_source = "data"
 

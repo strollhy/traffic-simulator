@@ -2,4 +2,5 @@
 .*
 *.pyc
 *.DS_Store
-data/*.txt
+data/output
+test/test_data
