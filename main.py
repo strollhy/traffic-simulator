@@ -49,7 +49,7 @@ class Simulator(Observer):
         for line in f:
             link_data = line.strip().split(',')
             link_id = link_data[0]
-            self.links[link_id] = MainLink(*link_data)
+            self.links[link_id] = Link(*link_data)
             self.links[link_id].register_observer(self)
 
         # Setup link connections

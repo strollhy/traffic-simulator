@@ -1,5 +1,6 @@
 from data_reader import DataReader
 from model.car import Car
+from helper.attribute_helper import AttributeHelper
 
 CARS = '../data/car.csv'
 
@@ -16,10 +17,13 @@ class CarReader(DataReader):
         if self._cars is None:
             self._cars = []
             for row in self:
-                row['path'] = row['path'].split('-')
-                self._cars.append(Car(row))
+                self._cars.append(self.create_car(row))
         return self._cars
 
+    @staticmethod
+    def create_car(args):
+        args['path'] = args['path'].split('-')
+        return AttributeHelper.assign_attribute(Car(), args)
 
 if __name__ == "__main__":
     reader = CarReader()

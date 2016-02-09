@@ -1,31 +1,29 @@
-__author__ = 'hongyusong'
-
 from system.observer import Observable
-f = open('data/density.txt', 'w')
+# TODO f = open('data/density.txt', 'w')
 
 
-class MainLink(Observable):
+class Link(Observable):
     def __init__(self, *data):
-        super(MainLink, self).__init__()
-        self.link_id = data[0]
-        self.length = float(data[1]) * 0.000189394 if data[1] else 200  # if no length is provided, assume infinite
-        self.max_cap = int(self.length / 0.00279617)
-        self.num_of_lanes = int(data[2])
-        self.min_speed = int(data[3])
-        self.max_speed = int(data[4])
-        self.jam_density = int(data[5])
-        self.time = 0
+        super(Link, self).__init__()
 
+        self.link_id = None
+        self.length = None
+        self.num_of_lanes = None
+        self.min_speed = None
+        self.max_speed = None
+        self.max_cap = None
+        self.jam_density = None
         self.next_link = {"T": None, "L": None, "R": None}
         self.conflict_link = None
+        self.sublink1 = self.sublink2 = self.link3 = None
 
+        self.time = 0
         self.num_of_cars = 0
         self.capacity = 0
         self.avg_speed = 0
-        self.lane_num = len(data[6:]) - 1
-        self.sublink1 = SubLink1(self, self.lane_num)
-        self.sublink2 = SubLink2(self, self.lane_num)
-        self.sublink3 = SubLink3(self, data[6:])
+
+    def __repr__(self):
+        return "%s, %s" % (self.link_id, self.length)
 
     def update_time(self, time):
         self.time = time

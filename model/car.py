@@ -1,17 +1,13 @@
 from system.observer import Observable
-from helper.attribute_helper import AttributeHelper
-
 
 class Car(Observable):
-    def __init__(self, args={}):
+    def __init__(self):
         super(Car, self).__init__()
 
         self.car_id = None
         self.start_time = None
         self.path = None
-        AttributeHelper.assign_attribute(self, args)
 
-        self.destination = self.path[-1]
         self.current_step = 0
         self.distance = 0
         self.arrive_time = 0
@@ -22,6 +18,10 @@ class Car(Observable):
 
     def __repr__(self):
         return "%s, %s" % (self.car_id, self.path)
+
+    @property
+    def destination(self):
+        return self.path[-1]
 
     def move_on(self):
         self.current_step += 1

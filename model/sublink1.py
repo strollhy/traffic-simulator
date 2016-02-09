@@ -1,6 +1,7 @@
 import random
 from sublink import SubLink
 
+
 class SubLink1(SubLink):
     def add_car(self, car):
         car.update_arrive_time(self.link.time)
