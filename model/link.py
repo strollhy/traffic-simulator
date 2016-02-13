@@ -74,9 +74,9 @@ class Link(Observable):
         l = self.length
         rho_jam = 220.0
         rho = (N-x)/(n*l-x/rho_jam + .1)
-        f = open('data/density.txt', 'a')
-        f.write("%s,%d,%d,%d,%f,%f,%d,%d\n" % (self.link_id, N, x, n, l, rho, self.sublink2.pass_count, self.time))
-        f.close()
+        # f = open('data/density.txt', 'a')
+        # f.write("%s,%d,%d,%d,%f,%f,%d,%d\n" % (self.link_id, N, x, n, l, rho, self.sublink2.pass_count, self.time))
+        # f.close()
         return rho
 
     def cal_velocity(self):

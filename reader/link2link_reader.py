@@ -1,5 +1,7 @@
 import csv
 from data_reader import DataReader
+from model.link2link import Link2Link
+from helper.attribute_helper import AttributeHelper
 
 LINK2LINKS = '../data/link2link.csv'
 
@@ -16,8 +18,12 @@ class Link2LinkReader(DataReader):
         if self._link2links is None:
             self._link2links = []
             for row in self:
-                self._link2links.append(row)
+                self._link2links.append(self.create_link2link(row))
         return self._link2links
+
+    @staticmethod
+    def create_link2link(args):
+        return AttributeHelper.assign_attribute(Link2Link(), args)
 
 
 if __name__ == "__main__":

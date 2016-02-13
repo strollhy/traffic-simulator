@@ -1,4 +1,4 @@
-Link ID,Left Link,Right Link,Through Link,Conflict Link
+link_id,left_link_id,right_link_id,through_link_id,conflict_link_id
 0,0,0,0,0
 1,6,2,21,23
 2,0,0,0,0

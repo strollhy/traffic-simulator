@@ -1,15 +1,16 @@
 import unittest
-from reader import car_reader, link_reader, link2link_reader
+from reader import car_reader, link_reader, link2link_reader, signal_reader
 from model.sublink1 import SubLink1
 from model.sublink2 import SubLink2
 from model.sublink3 import SubLink3
 
 
-class TestReader(unittest.TestCase):
+class ReaderTest(unittest.TestCase):
     def setUp(self):
         self.car_reader = car_reader.CarReader()
         self.link_reader = link_reader.LinkReader()
         self.link2link_reader = link2link_reader.Link2LinkReader()
+        self.signal_reader = signal_reader.SignalReader()
 
     def test_read_car(self):
         self.assertIsNotNone(self.car_reader.cars)
@@ -19,6 +20,9 @@ class TestReader(unittest.TestCase):
 
     def test_read_link2link(self):
         self.assertIsNotNone(self.link2link_reader.link2links)
+
+    def test_read_signal(self):
+        self.assertIsNotNone(self.signal_reader.signals)
 
     def test_car_creation(self):
         for car in self.car_reader.cars:
