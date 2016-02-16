@@ -1,4 +1,5 @@
 from system.observer import Observable
+from time import Time
 # TODO f = open('data/density.txt', 'w')
 
 
@@ -17,16 +18,12 @@ class Link(Observable):
         self.conflict_link = None
         self.sublink1 = self.sublink2 = self.link3 = None
 
-        self.time = 0
         self.num_of_cars = 0
         self.capacity = 0
         self.avg_speed = 0
 
     def __repr__(self):
         return "%s, %s" % (self.link_id, self.length)
-
-    def update_time(self, time):
-        self.time = time
 
     def add_car(self, car):
         """
@@ -38,7 +35,7 @@ class Link(Observable):
         self.notify_observers("Car #%s reaches link #%s" % (car.car_id, self.link_id))
         # update car status
         car.move_on()
-        car.update_arrive_time(self.time)
+        car.update_arrive_time()
 
         # check car status
         if not car.get_destination():

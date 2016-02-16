@@ -22,7 +22,7 @@ class CarReader(DataReader):
 
     @staticmethod
     def create_car(args):
-        args['path'] = args['path'].split('-')
+        args['path'] = [int(p) for p in args['path'].split('-')]
         return AttributeHelper.assign_attribute(Car(), args)
 
 if __name__ == "__main__":

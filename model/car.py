@@ -1,5 +1,6 @@
 from system.observer import Observable
 
+
 class Car(Observable):
     def __init__(self):
         super(Car, self).__init__()

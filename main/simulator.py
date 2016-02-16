@@ -9,21 +9,15 @@ from reader.car_reader import CarReader
 
 class Simulator(Observer):
     def __init__(self):
-        self.time = 0
+        Time()
         self.total_time = 0
-        self.cars = {}
+        self.cars = []
         self.links = {}
 
     def start(self):
-        # Setup data
         self._setup_system()
-
-        # initialize links
-        self.update_links()
-
-        # start simulation
-        while self.total_time > self.time:
-            self.next_time_stamp()
+        self.init_links()
+        self.start_simulation()
 
     def _setup_system(self):
         self.setup_links()
@@ -52,7 +46,9 @@ class Simulator(Observer):
     def setup_cars(self):
         for car in CarReader().cars:
             car.register_observer(self)
-            self.cars[car.car_id] = car
+            self.cars.append(car)
+
+        self.cars.sort(key=lambda c: c.start_time)
 
     def setup_lights(self):
         # TODO replace with
@@ -67,22 +63,31 @@ class Simulator(Observer):
                 self.links[link_id].sublink3.setup_signal(direction, data[2:])
         self.total_time = len(data[2:])
 
+    def init_links(self):
+        self.update_links()
+
+    def start_simulation(self):
+        # start simulation
+        while self.total_time > Time().time:
+            self.next_time_stamp()
+
     def next_time_stamp(self):
         self.print_status()
         self.update_time()
         self.release_cars()
         self.update_links()
 
+    @staticmethod
+    def print_status():
+        print "==== Time Stamp %ds =====" % (Time().time * 10)
+
     def update_time(self):
-        for link in self.links.values():
-            link.update_time(self.time)
+        while self.cars and self.cars[-1].start_time <= Time().time:
+            car = self.cars.pop()
+            link_id = car.path[0]
+            self.links[link_id].add_car(car)
 
-        for car in self.cars.values():
-            if self.time == car.start_time:
-                link_id = car.path[0]
-                self.links[link_id].add_car(car)
-
-        self.time += 1
+        Time().update_time()
 
     def release_cars(self):
         for link in self.links.values():
@@ -95,10 +100,6 @@ class Simulator(Observer):
     def update_links(self):
         for link in self.links.values():
             link.update_status()
-
-    # outputs
-    def print_status(self):
-        print "==== Time Stamp %ds =====" % (self.time * 10)
 
 
 if __name__ == '__main__':
