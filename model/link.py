@@ -16,7 +16,7 @@ class Link(Observable):
         self.jam_density = None
         self.next_link = {"T": None, "L": None, "R": None}
         self.conflict_link = None
-        self.sublink1 = self.sublink2 = self.link3 = None
+        self.sublink1 = self.sublink2 = self.sublink3 = None
 
         self.num_of_cars = 0
         self.capacity = 0
@@ -26,65 +26,51 @@ class Link(Observable):
         return "%s, %s" % (self.link_id, self.length)
 
     def add_car(self, car):
-        """
-        Add car to the main link
-
-        :param car:
-        :return:
-        """
         self.notify_observers("Car #%s reaches link #%s" % (car.car_id, self.link_id))
-        # update car status
+
+        if self.car_can_proceed(car):
+            self.sublink1.add_car(car)
+
+    def car_can_proceed(self, car):
         car.move_on()
-        car.update_arrive_time()
 
-        # check car status
-        if not car.get_destination():
-            self.notify_observers("Car #%s reaches its destination" % car.car_id)
-            return
-
-        # assign lane group to car
-        if not self.assign_lane_group(car):
-            self.notify_observers("Car #%s reaches dead end, couldn't find a path from %s to %s" % (car.car_id, self.link_id, car.get_destination()))
-            return
-
-        # add to sublink1
-        self.sublink1.add_car(car)
+        if car.reach_destination() or not self.assign_lane_group(car):
+            return False
+        else:
+            return True
 
     def assign_lane_group(self, car):
-        heading_link = car.get_destination()
+        heading_link = car.destination
         for group, link in self.next_link.items():
             if link and link.link_id == heading_link:
                 car.lane_group = group
                 return True
+        self.notify_observers("Car #%s reaches dead end, couldn't find a path from %s to %s" % (car.car_id, self.link_id, car.get_destination()))
         return False
 
     def update_status(self):
-        self.cal_velocity()
+        self.calculate_velocity()
 
-    def get_capacity(self):
-        return self.max_cap - self.sublink2.get_car_num() - self.sublink3.get_car_num() - self.sublink1.get_car_num()
-
-    def cal_density(self):
-        x = self.sublink2.get_car_num() + self.sublink3.get_car_num()
-        N = x + self.sublink1.get_car_num()
-        n = self.num_of_lanes
-        l = self.length
-        rho_jam = 220.0
-        rho = (N-x)/(n*l-x/rho_jam + .1)
-        # f = open('data/density.txt', 'a')
-        # f.write("%s,%d,%d,%d,%f,%f,%d,%d\n" % (self.link_id, N, x, n, l, rho, self.sublink2.pass_count, self.time))
-        # f.close()
-        return rho
-
-    def cal_velocity(self):
+    def calculate_velocity(self):
         if self.length == 0: return
         v_min = self.min_speed
         v_free = self.max_speed
-        rho = self.cal_density()
+        rho = self.calculate_density()
         rho_jam = 220.0
         alpha = 1.2
         beta = 1.8
         self.avg_speed = v_min + (v_free - v_min) * (1-(rho/rho_jam)**alpha)**beta
+
+    def calculate_density(self):
+        x = self.sublink2.get_car_num() + self.sublink3.get_car_num()
+        N = x + self.sublink1.get_car_num()
+        n = self.num_of_lanes
+        l = self.length
+        rho = (N-x)/(n*l-x/self.jam_density + .1)
+        return rho
+
+    def get_capacity(self):
+        return self.max_cap - self.sublink2.get_car_num() - self.sublink3.get_car_num() - self.sublink1.get_car_num()
 
     def release_cars(self):
         self.sublink1.release_cars()

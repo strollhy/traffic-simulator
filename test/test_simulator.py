@@ -22,6 +22,7 @@ class TestSimulator(unittest.TestCase):
         self.assertIsNotNone(self.simulator.cars)
         self.assertEquals(sorted(self.simulator.cars, key=lambda c: c.start_time),
                           self.simulator.cars)
+    # TODO add signal tests
     # def test_setup_lights(self):
     #     self.simulator.setup_lights()
 

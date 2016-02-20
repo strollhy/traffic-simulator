@@ -24,11 +24,14 @@ class Car(Observable):
     def destination(self):
         return self.path[-1]
 
+    def reach_destination(self):
+        if self.current_step >= len(self.path):
+            self.notify_observers("Car #%s reaches its destination" % self.car_id)
+            return True
+        return False
+
     def move_on(self):
         self.current_step += 1
-        if self.current_step >= len(self.path):
-            # TODO reach destination
-            pass
 
     def set_blocked(self, msg=""):
         self.is_blocked = True

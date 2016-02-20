@@ -39,6 +39,7 @@ class ReaderTest(unittest.TestCase):
             self.assertIsInstance(link.max_speed, int)
             self.assertIsInstance(link.max_cap, int)
             self.assertIsInstance(link.jam_density, int)
+            self.assertGreater(link.jam_density, 0)
             self.assertIsInstance(link.sublink1, SubLink1)
             self.assertIsInstance(link.sublink2, SubLink2)
             self.assertIsInstance(link.sublink3, SubLink3)
