@@ -21,7 +21,9 @@ class LinkReader(DataReader):
         if self._links is None:
             self._links = []
             for row in self:
-                self._links.append(self.create_link(row))
+                link = self.create_link(row)
+                if link:
+                    self._links.append(link)
         return self._links
 
     @staticmethod
@@ -29,7 +31,6 @@ class LinkReader(DataReader):
         # change to miles, if no length is provided, assume infinite
         args["length"] = float(args["length"]) * 0.000189394 if args["length"] else 200
         args["max_cap"] = int(args["length"] / 0.00279617)
-        args["lane_num"] = int(args["lane_num"]) - 1
 
         link = Link()
         LinkReader.create_sublinks(link, args)
@@ -37,9 +38,10 @@ class LinkReader(DataReader):
 
     @staticmethod
     def create_sublinks(link, args):
-        link.sublink1 = SubLink1(link, args['lane_num'])
-        link.sublink2 = SubLink2(link, args['lane_num'])
-        link.sublink3 = SubLink3(link, [args['lane_num'], args["T1"], args["T2"], args["R"]])
+        lane_num = max(1, len([x for x in [args["L"], args["T1"], args["T2"], args["R"]] if int(x) > 0]) - 1)
+        link.sublink1 = SubLink1(link, lane_num)
+        link.sublink2 = SubLink2(link, lane_num)
+        link.sublink3 = SubLink3(link, [args["L"], args["T1"], args["T2"], args["R"]])
 
 if __name__ == "__main__":
     reader = LinkReader()

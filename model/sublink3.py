@@ -1,4 +1,5 @@
 from lane import Lane
+from time import Time
 from sublink import SubLink
 
 
@@ -60,6 +61,10 @@ class SubLink3(SubLink):
     def group_capacity(self, group):
         return sum([lane.empty_space() for lane in self.lanes[group]])
 
+    def add_car(self, car, lane):
+        lane.add_car(car)
+        self.car_num += 1
+
     def find_available_lanes(self, group, lane_number):
         """
         Find empty space for given lane group
@@ -78,31 +83,14 @@ class SubLink3(SubLink):
             available_lanes = [lane for lane in self.lanes[group] if lane.empty_space()]
         return available_lanes
 
-    def add_car(self, car, lane):
-        """
-        Add car to the lane, update status
-
-        :param car:
-        :param lane:
-        :return:
-        """
-        lane.add_car(car)
-        car.update_arrive_time(self.link.time)
-        self.car_num += 1
-
     def remove_car(self, lane_group, lane_number):
-        self.lanes[lane_group][lane_number].link2links.pop(0)
+        self.lanes[lane_group][lane_number].cars.pop(0)
         self.car_num -= 1
 
     def is_red_light(self, lane_group):
-        return not (len(self.signals[lane_group]) == 0 or self.signals[lane_group][self.link.time] == '1')
+        return not (len(self.signals[lane_group]) == 0 or self.signals[lane_group][Time().time] == '1')
 
     def release_cars(self):
-        """
-        Release cars to next link
-
-        :return:
-        """
         # skip if already released
         if not self.released:
             self.release_left_group()
@@ -119,15 +107,15 @@ class SubLink3(SubLink):
         # try to release cars
         for lane_number, lane in enumerate(self.lanes[lane_group]):
             car_cnt = 0
-            while lane.link2links and not lane.link2links[0].is_blocked and lane.elapsed_time <= 10 - self.headway[-1]:
+            while lane.cars and not lane.cars[0].is_blocked and lane.elapsed_time <= 10 - self.headway[-1]:
                 # consider pedestrian
-                if lane.link2links[0].lane_group == "R":
+                if lane.cars[0].lane_group == "R":
                     if car_cnt == 0:
                         lane.elapsed_time += self.pedestrian_time
                     else:
                         car_cnt += 1
 
-                self.release_car(lane.link2links[0], lane_group, lane_number)
+                self.release_car(lane.cars[0], lane_group, lane_number)
                 lane.elapsed_time += self.headway[-1]
 
             if lane.elapsed_time > 10 - self.headway[-1]:
@@ -135,7 +123,7 @@ class SubLink3(SubLink):
 
         # after release reset block flag
         for lane in self.lanes[lane_group]:
-            for car in lane.link2links:
+            for car in lane.cars:
                 car.unset_blocked()
 
     def release_left_group(self):
@@ -164,14 +152,14 @@ class SubLink3(SubLink):
                     conflict_lane.elapsed_time <= 10 - self.headway[-1]:
                 # predict collision
                 # if both have cars, need to predict conflict
-                if not current_lane.link2links or current_lane.elapsed_time > 10 - self.headway[-1]:
+                if not current_lane.cars or current_lane.elapsed_time > 10 - self.headway[-1]:
                     conflict_link.sublink3.release_group("L")
                     break
-                elif not conflict_lane.link2links or conflict_lane.elapsed_time > 10 - self.headway[-1]:
+                elif not conflict_lane.cars or conflict_lane.elapsed_time > 10 - self.headway[-1]:
                     self.release_group("L")
                     break
                 else:
-                    car1, car2 = current_lane.link2links[0], conflict_lane.link2links[0]
+                    car1, car2 = current_lane.cars[0], conflict_lane.cars[0]
                     has_conflict, release_time = self.get_conflict(car1, conflict_lane)
                     if has_conflict or car1.is_blocked:
                         # if car 1 is blocked, then just release car 2
@@ -194,7 +182,7 @@ class SubLink3(SubLink):
     def get_conflict(self, car, conflict_lane):
         release_time = self.pL if car.lane_group == "L" else self.pT
         if car.lane_group == "L":
-            for i, conflict_car in enumerate(conflict_lane.link2links):
+            for i, conflict_car in enumerate(conflict_lane.cars):
                 if conflict_car.lane_group == "T":
                     through_time = sum(self.headway[1:i+1])
                     if through_time + self.pT / 2 < self.pL / 2:
@@ -226,50 +214,50 @@ class SubLink3(SubLink):
             index = 0
 
             # type I
-            while index < len(lane.link2links):
-                if lane.link2links[index].lane_group == "T":
+            while index < len(lane.cars):
+                if lane.cars[index].lane_group == "T":
                     types[0] += 1
                 else:
                     break
                 index += 1
 
             # type II
-            while index < len(lane.link2links):
-                if lane.link2links[index].lane_group == "L":
+            while index < len(lane.cars):
+                if lane.cars[index].lane_group == "L":
                     types[1] += 1
                 else:
                     break
                 index += 1
 
             # type III
-            types[2] = len(lane.link2links[index:])
+            types[2] = len(lane.cars[index:])
 
         # For right lane group
         for lane in self.lanes["R"]:
             index = 0
 
             # type I
-            while index < len(lane.link2links):
-                if lane.link2links[index].lane_group == "T":
+            while index < len(lane.cars):
+                if lane.cars[index].lane_group == "T":
                     types[3] += 1
                 else:
                     break
                 index += 1
 
             # type II
-            while index < len(lane.link2links):
-                if lane.link2links[index].lane_group == "R":
+            while index < len(lane.cars):
+                if lane.cars[index].lane_group == "R":
                     types[4] += 1
                 else:
                     break
                 index += 1
 
             # type III
-            types[5] = len(lane.link2links[index:])
+            types[5] = len(lane.cars[index:])
 
         # For through lane group
         for lane in self.lanes["T"]:
-            types[6] += len(lane.link2links)
+            types[6] += len(lane.cars)
 
         return types
 

@@ -44,5 +44,7 @@ class ReaderTest(unittest.TestCase):
             self.assertIsInstance(link.sublink2, SubLink2)
             self.assertIsInstance(link.sublink3, SubLink3)
 
+    # TODO test link2link
+
 if __name__ == '__main__':
     unittest.main()

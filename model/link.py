@@ -40,12 +40,12 @@ class Link(Observable):
             return True
 
     def assign_lane_group(self, car):
-        heading_link = car.destination
+        heading_link = car.next_link
         for group, link in self.next_link.items():
             if link and link.link_id == heading_link:
                 car.lane_group = group
                 return True
-        self.notify_observers("Car #%s reaches dead end, couldn't find a path from %s to %s" % (car.car_id, self.link_id, car.get_destination()))
+        self.notify_observers("Car #%s reaches dead end, couldn't find a path from %s to %s" % (car.car_id, self.link_id, car.next_link))
         return False
 
     def update_status(self):

@@ -6,7 +6,7 @@ class SubLink1(SubLink):
     def add_car(self, car):
         direction = car.lane_group
         if direction == "T":
-            i = random.randint(0, len(self.lanes) - 2)
+            i = random.randint(0, len(self.lanes) - 1)
             self.lanes[i].append(car)
         elif direction == "R":
             self.lanes[-1].append(car)

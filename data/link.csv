@@ -1,4 +1,4 @@
-link_id,length,num_of_lanes,min_speed,max_speed,jam_density,lane_num,T1,T2,R
+link_id,length,num_of_lanes,min_speed,max_speed,jam_density,L,T1,T2,R
 0,,2,5,45,220,0,0,0,0
 1,,3,5,45,220,4,5,0,5
 2,,2,5,45,220,0,0,0,0

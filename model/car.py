@@ -15,14 +15,14 @@ class Car(Observable):
         self.lane_group = None
 
         self.is_blocked = False
-        self.block_count = 0
+        self.blocked_count = 0
 
     def __repr__(self):
         return "%s, %s" % (self.car_id, self.path)
 
     @property
-    def destination(self):
-        return self.path[-1]
+    def next_link(self):
+        return self.path[self.current_step] if not self.reach_destination() else None
 
     def reach_destination(self):
         if self.current_step >= len(self.path):
@@ -37,7 +37,7 @@ class Car(Observable):
         self.is_blocked = True
         self.blocked_count += 1
         self.notify_observers("Car #%s is blocked to %s, %s. {%s}"
-                              % (self.car_id, self.get_destination(), self.lane_group, msg))
+                              % (self.car_id, self.next_link, self.lane_group, msg))
 
     def unset_blocked(self):
         self.is_blocked = False

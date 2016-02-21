@@ -15,11 +15,11 @@ class Simulator(Observer):
         self.links = {}
 
     def start(self):
-        self._setup_system()
+        self.setup_system()
         self.init_links()
         self.start_simulation()
 
-    def _setup_system(self):
+    def setup_system(self):
         self.setup_links()
         self.setup_link2links()
         self.setup_cars()
@@ -48,7 +48,7 @@ class Simulator(Observer):
             car.register_observer(self)
             self.cars.append(car)
 
-        self.cars.sort(key=lambda c: c.start_time)
+        self.cars.sort(key=lambda c: c.start_time, reverse=True)
 
     def setup_lights(self):
         # TODO replace with
@@ -67,27 +67,24 @@ class Simulator(Observer):
         self.update_links()
 
     def start_simulation(self):
-        # start simulation
         while self.total_time > Time().time:
             self.next_time_stamp()
 
     def next_time_stamp(self):
         self.print_status()
-        self.update_time()
+        self.unleash_cars()
         self.release_cars()
         self.update_links()
+        Time().update_time()
 
     @staticmethod
     def print_status():
         print "==== Time Stamp %ds =====" % (Time().time * 10)
 
-    def update_time(self):
+    def unleash_cars(self):
         while self.cars and self.cars[-1].start_time <= Time().time:
             car = self.cars.pop()
-            link_id = car.path[0]
-            self.links[link_id].add_car(car)
-
-        Time().update_time()
+            self.links[car.path[0]].add_car(car)
 
     def release_cars(self):
         for link in self.links.values():

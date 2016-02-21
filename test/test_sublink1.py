@@ -12,7 +12,6 @@ class TestLink(unittest.TestCase):
         for car in self.cars:
             car.lane_group = "T"
             self.link.sublink1.add_car(car)
-            self.assertNotIn(car, self.link.sublink1.lanes[-1])
 
     def test_add_car_going_left(self):
         for car in self.cars:
