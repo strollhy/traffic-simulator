@@ -1,10 +1,9 @@
 from model.link import *
-from model.car import *
-
-from system.observer import Observer
+from util.observer import Observer
 from reader.link_reader import LinkReader
 from reader.link2link_reader import Link2LinkReader
 from reader.car_reader import CarReader
+from helper.traffic_generator import *
 
 
 class Simulator(Observer):
@@ -20,10 +19,14 @@ class Simulator(Observer):
         self.start_simulation()
 
     def setup_system(self):
+        self.traffic_generator = TrafficGenerator()
+        self.traffic_generator.register_observer(self)
+        self.traffic_generator.generate_traffic(car_num_eff=.1)
+
         self.setup_links()
         self.setup_link2links()
         self.setup_cars()
-        self.setup_lights()
+        self.setup_signals()
 
     def setup_links(self):
         for link in LinkReader().links:
@@ -50,7 +53,7 @@ class Simulator(Observer):
 
         self.cars.sort(key=lambda c: c.start_time, reverse=True)
 
-    def setup_lights(self):
+    def setup_signals(self):
         # TODO replace with
         f = open('../data/signal_2.csv')
         f.readline()

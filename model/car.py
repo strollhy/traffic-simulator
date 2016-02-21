@@ -1,4 +1,4 @@
-from system.observer import Observable
+from util.observer import Observable
 
 
 class Car(Observable):
@@ -8,6 +8,7 @@ class Car(Observable):
         self.car_id = None
         self.start_time = None
         self.path = None
+        self.od = None
 
         self.current_step = 0
         self.distance = 0

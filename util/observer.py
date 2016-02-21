@@ -1,6 +1,3 @@
-__author__ = 'hongyusong'
-
-
 class Observable(object):
     def __init__(self):
         self.__observers = []
@@ -25,4 +22,4 @@ class Observer(object):
 if __name__ == '__main__':
     subject = Observable()
     observer = Observer(subject)
-    subject.notify_observers()
+    subject.notify_observers("HELLO WORLD")

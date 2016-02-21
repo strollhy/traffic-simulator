@@ -1,4 +1,4 @@
-from system.observer import Observable
+from util.observer import Observable
 from time import Time
 # TODO f = open('data/density.txt', 'w')
 
