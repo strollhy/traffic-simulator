@@ -9,4 +9,4 @@ class Signal(object):
         self.right_period = None
 
     def __repr__(self):
-        return "%d" % (self.link_id)
+        return "link_id: %d" % (self.link_id)

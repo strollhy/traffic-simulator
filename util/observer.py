@@ -11,12 +11,13 @@ class Observable(object):
 
 
 class Observer(object):
-    def __init__(self, observable):
+    def __init__(self):
         self.__observables = []
-        observable.register_observer(self)
+        self.mute = False
 
     def notify(self, observable, *args, **kwargs):
-        print args
+        if not self.mute:
+            print args
 
 
 if __name__ == '__main__':

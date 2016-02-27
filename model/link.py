@@ -19,14 +19,18 @@ class Link(Observable):
         self.sublink1 = self.sublink2 = self.sublink3 = None
 
         self.num_of_cars = 0
-        self.capacity = 0
         self.avg_speed = 0
 
     def __repr__(self):
-        return "%s, %s" % (self.link_id, self.length)
+        return "#%s [capacity: %d]" % (self.link_id, self.capacity)
+
+    @property
+    def capacity(self):
+        return self.max_cap - self.sublink2.get_car_num() - self.sublink3.get_car_num() - self.sublink1.get_car_num()
 
     def add_car(self, car):
-        self.notify_observers("Car #%s reaches link #%s" % (car.car_id, self.link_id))
+        # TODO won't allow car in if link is jamed
+        self.notify_observers("Car %s reaches link %s" % (car, self))
 
         if self.car_can_proceed(car):
             self.sublink1.add_car(car)
@@ -45,7 +49,7 @@ class Link(Observable):
             if link and link.link_id == heading_link:
                 car.lane_group = group
                 return True
-        self.notify_observers("Car #%s reaches dead end, couldn't find a path from %s to %s" % (car.car_id, self.link_id, car.next_link))
+        self.notify_observers("Car %s reaches dead end, couldn't find a path" % car)
         return False
 
     def update_status(self):
@@ -68,9 +72,6 @@ class Link(Observable):
         l = self.length
         rho = (N-x)/(n*l-x/self.jam_density + .1)
         return rho
-
-    def get_capacity(self):
-        return self.max_cap - self.sublink2.get_car_num() - self.sublink3.get_car_num() - self.sublink1.get_car_num()
 
     def release_cars(self):
         self.sublink1.release_cars()

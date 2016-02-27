@@ -2,7 +2,7 @@ from data_reader import DataReader
 from model.car import Car
 from helper.attribute_helper import AttributeHelper
 
-CARS = '../data/car.csv'
+CARS = '../data/output/car.csv'
 
 
 class CarReader(DataReader):

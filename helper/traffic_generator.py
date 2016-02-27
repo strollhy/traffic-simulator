@@ -14,7 +14,7 @@ class TrafficGenerator(Observable):
     def generate_traffic(self, file_name=INPUT_FILENAME, car_num_eff=CAR_NUM_EFF):
         self.notify_observers("========== Start generating traffic ==========")
         fin = open(file_name)
-        fout = open('../data/car.csv', 'w')
+        fout = open('../data/output/car.csv', 'w')
         fout.write('car_id,start_time,path' + "\n")
 
         car_id = 1
@@ -29,7 +29,7 @@ class TrafficGenerator(Observable):
     def rend_car_old(self, car_num_eff=CAR_NUM_EFF):
         fin = open('../data/old_path.csv')
         fin.readline()
-        fout = open('../data/car.csv', 'w')
+        fout = open('../data/output/car.csv', 'w')
         fout.write('car_id,start_time,path' + "\n")
 
         for line in fin:

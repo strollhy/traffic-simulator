@@ -8,6 +8,7 @@ from helper.traffic_generator import *
 
 class Simulator(Observer):
     def __init__(self):
+        super(Simulator, self).__init__()
         Time()
         self.total_time = 0
         self.cars = []
@@ -80,9 +81,8 @@ class Simulator(Observer):
         self.update_links()
         Time().update_time()
 
-    @staticmethod
-    def print_status():
-        print "==== Time Stamp %ds =====" % (Time().time * 10)
+    def print_status(self):
+        self.notify(None, "==== Time Stamp %ds =====" % (Time().time * 10))
 
     def unleash_cars(self):
         while self.cars and self.cars[-1].start_time <= Time().time:

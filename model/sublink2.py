@@ -53,8 +53,8 @@ class SubLink2(SubLink):
         car = self.lanes[lane_number].pop(0)
         self.allowed_merge[car.lane_group] -= 1
         self.link.sublink3.add_car(car, next_lane)
-        self.link.notify_observers("Adding car #%d to merging group %s, %d -> %d"
-                                   % (car.car_id, car.lane_group, self.link.link_id, car.next_link))
+        self.link.notify_observers("Adding car %s to merging group %s"
+                                   % (car, car.lane_group))
 
     def update_allowed_merge(self):
         if not self.lanes:
@@ -73,6 +73,7 @@ class SubLink2(SubLink):
     def count_cars_in_lane_group(lane, lane_group):
         return len([c for c in lane if lane_group == c.lane_group])
 
+    # TODO remove this in the future
     def cal_blockage_factor(self, direction):
         if direction == "L":
             # if totally blocked on the group

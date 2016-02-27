@@ -19,7 +19,7 @@ class Car(Observable):
         self.blocked_count = 0
 
     def __repr__(self):
-        return "%s, %s" % (self.car_id, self.path)
+        return "#%s [%s->%s]" % (self.car_id, self.path[self.current_step - 1], self.next_link)
 
     @property
     def next_link(self):
@@ -27,7 +27,7 @@ class Car(Observable):
 
     def reach_destination(self):
         if self.current_step >= len(self.path):
-            self.notify_observers("Car #%s reaches its destination" % self.car_id)
+            self.notify_observers("Car %s reaches its destination" % self.__repr__())
             return True
         return False
 
@@ -37,8 +37,8 @@ class Car(Observable):
     def set_blocked(self, msg=""):
         self.is_blocked = True
         self.blocked_count += 1
-        self.notify_observers("Car #%s is blocked to %s, %s. {%s}"
-                              % (self.car_id, self.next_link, self.lane_group, msg))
+        self.notify_observers("Car %s is blocked to %s. {%s}"
+                              % (self.__repr__(), self.lane_group, msg))
 
     def unset_blocked(self):
         self.is_blocked = False

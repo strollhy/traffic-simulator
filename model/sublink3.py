@@ -80,6 +80,7 @@ class SubLink3(SubLink):
                                      key=lambda x: x.empty_space(),
                                      reverse=True)
         else:
+            # TODO left turn could be blocked
             available_lanes = [lane for lane in self.lanes[group] if lane.empty_space()]
         return available_lanes
 
@@ -186,22 +187,23 @@ class SubLink3(SubLink):
                 if conflict_car.lane_group == "T":
                     through_time = sum(self.headway[1:i+1])
                     if through_time + self.pT / 2 < self.pL / 2:
-                        self.link.notify_observers("Car #%s waits for Car #%s to move" % (car.car_id, conflict_car.car_id))
+                        self.link.notify_observers("Car %s waits for Car %s to move" % (car, conflict_car))
                         return True, through_time
                     else:
                         return False, release_time
         return False, release_time
 
     def release_car(self, car, lane_group, lane_number):
-        if self.link.next_link[car.lane_group].get_capacity() > 0:
-            self.link.notify_observers("Car #%s %s turn to Link #%s" %
-                                       (car.car_id, car.lane_group, self.link.next_link[car.lane_group].link_id))
+        if self.link.next_link[car.lane_group].capacity > 0:
+            self.link.notify_observers("Car %s %s turn to Link %s" %
+                                       (car, car.lane_group, self.link.next_link[car.lane_group]))
             self.remove_car(lane_group, lane_number)
             self.link.next_link[car.lane_group].add_car(car)
         else:
             car.set_blocked("No space left on next link")
 
     def group_cars(self):
+        # TODO use it, different car type could have different logic
         """
         Group cars to seven types
         :return: array of types count

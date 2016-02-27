@@ -10,6 +10,9 @@ class Lane:
         self.elapsed_time = 0
         self.cars = []
 
+    def __repr__(self):
+        return "link: %d, capacity: %d" % (self.link, self.capacity)
+
     def add_car(self, car):
         self.cars.append(car)
 
