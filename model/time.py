@@ -16,3 +16,6 @@ class Time(object):
 
     def update_time(self):
         self._time += 1
+
+    def reset(self):
+        self._time = 0

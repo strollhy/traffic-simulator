@@ -7,8 +7,8 @@ SINGALS = '../data/signal_simple.csv'
 
 class SignalReader(DataReader):
 
-    def __init__(self, path=SINGALS):
-        super(SignalReader, self).__init__(path)
+    def __init__(self, filename=SINGALS):
+        super(SignalReader, self).__init__(filename)
 
         self._signals = None
 

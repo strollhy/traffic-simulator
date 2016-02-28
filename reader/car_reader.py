@@ -7,8 +7,8 @@ CARS = '../data/output/car.csv'
 
 class CarReader(DataReader):
 
-    def __init__(self, path=CARS):
-        super(CarReader, self).__init__(path)
+    def __init__(self, filename=CARS):
+        super(CarReader, self).__init__(filename)
 
         self._cars = None
 

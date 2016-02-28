@@ -4,7 +4,7 @@ from time import Time
 
 
 class Link(Observable):
-    def __init__(self, *data):
+    def __init__(self):
         super(Link, self).__init__()
 
         self.link_id = None
@@ -33,22 +33,28 @@ class Link(Observable):
         self.notify_observers("Car %s reaches link %s" % (car, self))
 
         if self.car_can_proceed(car):
+            # store elapsed time
+            if car.od in self.simulator.paths and car.path_id in self.simulator.paths[car.od]:
+                self.simulator.paths[car.od][car.path_id].elapse_time += car.arrive_time - car.start_time
+            # print car.path_id, car.arrive_time - car.start_time
+            # print self.simulator.paths[car.od][car.path_id].elapse_time
+
             self.sublink1.add_car(car)
 
     def car_can_proceed(self, car):
-        car.move_on()
-
         if car.reach_destination() or not self.assign_lane_group(car):
             return False
         else:
+            car.move_on()
             return True
 
     def assign_lane_group(self, car):
         heading_link = car.next_link
-        for group, link in self.next_link.items():
-            if link and link.link_id == heading_link:
-                car.lane_group = group
-                return True
+        if heading_link:
+            for group, link in self.next_link.items():
+                if link and link.link_id == heading_link:
+                    car.lane_group = group
+                    return True
         self.notify_observers("Car %s reaches dead end, couldn't find a path" % car)
         return False
 

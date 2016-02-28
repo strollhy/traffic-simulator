@@ -8,8 +8,8 @@ LINK2LINKS = '../data/link2link.csv'
 
 class Link2LinkReader(DataReader):
 
-    def __init__(self, path=LINK2LINKS):
-        super(Link2LinkReader, self).__init__(path)
+    def __init__(self, filename=LINK2LINKS):
+        super(Link2LinkReader, self).__init__(filename)
 
         self._link2links = None
 

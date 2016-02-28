@@ -4,20 +4,22 @@ from util.observer import Observable
 od_pairs = {}
 time_interval = 100
 CAR_NUM_EFF = .017
-INPUT_FILENAME = "../data/output/allocation_path.csv"
+INPUT_FILENAME = "../data/output/seed_path.csv"
 
 
 class TrafficGenerator(Observable):
-    def __init__(self):
+    def __init__(self, filename=INPUT_FILENAME):
         super(TrafficGenerator, self).__init__()
+        self.filename = filename
 
-    def generate_traffic(self, file_name=INPUT_FILENAME, car_num_eff=CAR_NUM_EFF):
+    def generate_traffic(self, car_num_eff=CAR_NUM_EFF):
         self.notify_observers("========== Start generating traffic ==========")
-        fin = open(file_name)
+        fin = open(self.filename)
         fout = open('../data/output/car.csv', 'w')
         fout.write('car_id,start_time,path' + "\n")
 
         car_id = 1
+        fin.readline()
         for line in fin:
             path, car_num = line.strip().split(',')
             for _ in xrange(int(int(car_num) * car_num_eff)):
@@ -25,6 +27,7 @@ class TrafficGenerator(Observable):
                 fout.write("%d,%d,%s\n" % (car_id, start_time, path))
                 car_id += 1
         self.notify_observers("========== Generating finished, %d cars created ==========" % car_id)
+        fin.close()
 
     def rend_car_old(self, car_num_eff=CAR_NUM_EFF):
         fin = open('../data/old_path.csv')
@@ -59,4 +62,4 @@ class TrafficGenerator(Observable):
         fout.close()
 
 if __name__ == '__main__':
-    TrafficGenerator().generate_traffic(INPUT_FILENAME)
+    TrafficGenerator().generate_traffic()

@@ -3,6 +3,7 @@ from util.observer import Observer
 from reader.link_reader import LinkReader
 from reader.link2link_reader import Link2LinkReader
 from reader.car_reader import CarReader
+from reader.path_reader import PathReader
 from helper.traffic_generator import *
 
 
@@ -13,6 +14,10 @@ class Simulator(Observer):
         self.total_time = 0
         self.cars = []
         self.links = {}
+        self.paths = {}
+
+        self.path_reader = PathReader()
+        self.traffic_generator = TrafficGenerator()
 
     def start(self):
         self.setup_system()
@@ -20,7 +25,6 @@ class Simulator(Observer):
         self.start_simulation()
 
     def setup_system(self):
-        self.traffic_generator = TrafficGenerator()
         self.traffic_generator.register_observer(self)
         self.traffic_generator.generate_traffic(car_num_eff=.1)
 
@@ -28,9 +32,11 @@ class Simulator(Observer):
         self.setup_link2links()
         self.setup_cars()
         self.setup_signals()
+        self.setup_paths()
 
     def setup_links(self):
         for link in LinkReader().links:
+            link.simulator = self
             self.links[link.link_id] = link
             self.links[link.link_id].register_observer(self)
 
@@ -66,6 +72,14 @@ class Simulator(Observer):
             if direction in ["T", "R", "L"]:
                 self.links[link_id].sublink3.setup_signal(direction, data[2:])
         self.total_time = len(data[2:])
+
+    def setup_paths(self):
+        for path in self.path_reader.paths:
+            od = path.nodes[0], path.nodes[-1]
+            if od in self.paths:
+                self.paths[od][path.__str__()] = path
+            else:
+                self.paths[od] = {path.__str__(): path}
 
     def init_links(self):
         self.update_links()

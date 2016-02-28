@@ -1,5 +1,5 @@
 import unittest
-from reader import car_reader, link_reader, link2link_reader, signal_reader
+from reader import car_reader, link_reader, link2link_reader, signal_reader, path_reader
 from model.sublink1 import SubLink1
 from model.sublink2 import SubLink2
 from model.sublink3 import SubLink3
@@ -11,6 +11,7 @@ class ReaderTest(unittest.TestCase):
         self.link_reader = link_reader.LinkReader()
         self.link2link_reader = link2link_reader.Link2LinkReader()
         self.signal_reader = signal_reader.SignalReader()
+        self.path_reader = path_reader.PathReader()
 
     def test_read_car(self):
         self.assertIsNotNone(self.car_reader.cars)
@@ -23,6 +24,9 @@ class ReaderTest(unittest.TestCase):
 
     def test_read_signal(self):
         self.assertIsNotNone(self.signal_reader.signals)
+
+    def test_read_path(self):
+        self.assertIsNotNone(self.path_reader.paths)
 
     def test_car_creation(self):
         for car in self.car_reader.cars:
@@ -44,7 +48,9 @@ class ReaderTest(unittest.TestCase):
             self.assertIsInstance(link.sublink2, SubLink2)
             self.assertIsInstance(link.sublink3, SubLink3)
 
-    # TODO test link2link
+    def test_link2link_creation(self):
+        # TODO test link2link
+        pass
 
 if __name__ == '__main__':
     unittest.main()

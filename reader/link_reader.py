@@ -11,8 +11,8 @@ LINKS = "../data/link.csv"
 
 class LinkReader(DataReader):
 
-    def __init__(self, path=LINKS):
-        super(LinkReader, self).__init__(path)
+    def __init__(self, filename=LINKS):
+        super(LinkReader, self).__init__(filename)
 
         self._links = None
 
