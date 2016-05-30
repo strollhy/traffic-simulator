@@ -31,6 +31,7 @@ class LinkReader(DataReader):
         # change to miles, if no length is provided, assume infinite
         args["length"] = float(args["length"]) * 0.000189394 if args["length"] else 200
         args["max_cap"] = int(args["length"] / 0.00279617)
+        args["lanes_num"] = int(args["lanes_num"]) if args["lanes_num"] else 0
 
         link = Link()
         LinkReader.create_sublinks(link, args)
@@ -38,14 +39,10 @@ class LinkReader(DataReader):
 
     @staticmethod
     def create_sublinks(link, args):
-        # TODO read from each lane type
-        # lane type format:
-        # L,LT,T,TR,LTR
-        # 4,0,4,0,5
-        lane_num = max(1, len([x for x in [args["L"], args["T1"], args["T2"], args["R"]] if int(x) > 0]) - 1)
-        link.sublink1 = SubLink1(link, lane_num)
-        link.sublink2 = SubLink2(link, lane_num)
-        link.sublink3 = SubLink3(link, [args["L"], args["T1"], args["T2"], args["R"]])
+        lane_types = ["L","LT","T1","T2","T3","LTR","TR","R"]
+        link.sublink1 = SubLink1(link, args["lanes_num"])
+        link.sublink2 = SubLink2(link, args["lanes_num"])
+        link.sublink3 = SubLink3(link, [(k, args[k]) for k in lane_types if args[k]])
 
 if __name__ == "__main__":
     reader = LinkReader()

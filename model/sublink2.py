@@ -55,21 +55,21 @@ class SubLink2(SubLink):
                                    % (car, car.lane_group))
         return car
 
-    def find_available_lane(car, lane_number):
+    def find_available_lane(self, car, lane_number):
         available_lanes = self.next_link.find_available_lanes(car.lane_group)
         if not available_lanes:
             return None
 
         if car.lane_group == "L":
             i, lane = available_lanes.pop()
-            if lane.type == "L" and i + 1 < len(self.next_link.lanes()):
+            if "L" in lane.type and i + 1 < len(self.next_link.lanes()):
                 if self.next_link.lanes[i + 1].empty_space:
                     return lane
             else:
                 return lane
         elif car.lane_group == "R":
             i, lane = available_lanes.pop()
-            if lane.type == "R" and i - 1 >= 0:
+            if "R" in lane.type and i - 1 >= 0:
                 if self.next_link.lanes[i - 1].empty_space:
                     return lane
             else:

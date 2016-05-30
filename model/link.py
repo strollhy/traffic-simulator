@@ -9,21 +9,22 @@ class Link(Observable):
 
         self.link_id = None
         self.length = None
-        self.num_of_lanes = None
-        self.min_speed = None
-        self.max_speed = None
+        self.lanes = None
         self.max_cap = None
-        self.jam_density = None
         self.next_link = {"T": None, "L": None, "R": None}
         self.conflict_link = None
         self.sublink1 = self.sublink2 = self.sublink3 = None
         self.signal = None
+        self.type = None
 
+        self.min_speed = 5
+        self.max_speed = 45
+        self.jam_density = 220
         self.num_of_cars = 0
         self.avg_speed = 0
 
     def __repr__(self):
-        return "#%s [capacity: %d %d %d %d]" % (self.link_id, self.capacity, self.sublink1.car_num, self.sublink2.car_num, self.sublink3.car_num)
+        return "#%s %s [cap: %d %d %d %d]" % (self.link_id, self.type, self.capacity, self.sublink1.car_num, self.sublink2.car_num, self.sublink3.car_num)
 
     @property
     def capacity(self):

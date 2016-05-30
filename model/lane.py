@@ -68,6 +68,7 @@ class Lane:
 
     def _release_cars(self):
         car = self.cars[0]
+        used_time = 0
         if car.lane_group == "L":
             used_time += self._release_left_group(car)
         elif car.lane_group == "T":

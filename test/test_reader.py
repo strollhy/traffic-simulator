@@ -38,7 +38,7 @@ class ReaderTest(unittest.TestCase):
         for link in self.link_reader.links:
             self.assertIsInstance(link.link_id, int)
             self.assertIsInstance(link.length, int)
-            self.assertIsInstance(link.num_of_lanes, int)
+            self.assertIsInstance(link.lanes_num, int)
             self.assertIsInstance(link.min_speed, int)
             self.assertIsInstance(link.max_speed, int)
             self.assertIsInstance(link.max_cap, int)

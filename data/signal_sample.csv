@@ -1,0 +1,4 @@
+link_id,lane_type,cycle_length,green_start_time,end_time
+6,lt,120,56,120
+6,t,120,56,120
+6,tr,120,56,120
