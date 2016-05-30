@@ -17,23 +17,23 @@ class Link(Observable):
         self.next_link = {"T": None, "L": None, "R": None}
         self.conflict_link = None
         self.sublink1 = self.sublink2 = self.sublink3 = None
+        self.signal = None
 
         self.num_of_cars = 0
         self.avg_speed = 0
 
     def __repr__(self):
-        return "#%s [capacity: %d]" % (self.link_id, self.capacity)
+        return "#%s [capacity: %d %d %d %d]" % (self.link_id, self.capacity, self.sublink1.car_num, self.sublink2.car_num, self.sublink3.car_num)
 
     @property
     def capacity(self):
-        return self.max_cap - self.sublink2.get_car_num() - self.sublink3.get_car_num() - self.sublink1.get_car_num()
+        return self.max_cap - self.sublink1.car_num - self.sublink2.car_num - self.sublink3.car_num
 
     def add_car(self, car):
         # TODO won't allow car in if link is jamed
         self.notify_observers("Car %s reaches link %s" % (car, self))
 
         if self.car_can_proceed(car):
-            # store elapsed time
             if car.od in self.simulator.paths and car.path_id in self.simulator.paths[car.od]:
                 self.simulator.paths[car.od][car.path_id].elapse_time += car.arrive_time - car.start_time
             # print car.path_id, car.arrive_time - car.start_time
@@ -72,8 +72,8 @@ class Link(Observable):
         self.avg_speed = v_min + (v_free - v_min) * (1-(rho/rho_jam)**alpha)**beta
 
     def calculate_density(self):
-        x = self.sublink2.get_car_num() + self.sublink3.get_car_num()
-        N = x + self.sublink1.get_car_num()
+        x = self.sublink2.car_num + self.sublink3.car_num
+        N = x + self.sublink1.car_num
         n = self.num_of_lanes
         l = self.length
         rho = (N-x)/(n*l-x/self.jam_density + .1)
@@ -81,8 +81,17 @@ class Link(Observable):
 
     def release_cars(self):
         self.sublink1.release_cars()
-        self.sublink2.release_cars(10)
-        self.sublink3.release_cars()
+        if self.conflict_link:
+            self.conflict_link.sublink1.release_cars()
+
+        t = 0
+        while t < Time().time_stamp:
+            tao = min([lane for lane in [lanes for lanes in self.sublink3.lanes.values]]) * 1.5
+            tao = min(tao, min([lane for lane in [lanes for lanes in self.conflict_link.sublink3.lanes.values]])) if self.conflict_link else tao
+            self.sublink2.release_cars()
+            self.sublink3.release_cars(tao)
+            t += tao
 
     def post_release(self):
-        self.sublink3.post_release()
+        pass
+        # self.sublink3.post_release()

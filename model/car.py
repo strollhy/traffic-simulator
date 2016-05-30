@@ -30,7 +30,7 @@ class Car(Observable):
         return self.path[self.current_step] if self.current_step < len(self.path) - 1 else None
 
     def reach_destination(self):
-        if self.current_step == len(self.path) - 1:
+        if self.current_step >= len(self.path) - 1:
             self.notify_observers("Car %s reaches its destination" % self.car_id)
             return True
         return False

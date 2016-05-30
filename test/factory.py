@@ -24,7 +24,7 @@ class CarFactory(Factory):
         car = Car()
         car.car_id = random_uuid()
         car.start_time = random.randint(0, 100)
-        car.lane_group = random.sample(["T", "R", "L"], 1)
+        car.lane_group = random.sample(["T", "R", "L"], 1)[0]
         car.path = []
         return car
 
@@ -36,5 +36,5 @@ class LinkFactory(Factory):
         link.link_id = random_uuid()
         link.sublink1 = SubLink1(link, 5)
         link.sublink2 = SubLink2(link, 5)
-        link.sublink3 = SubLink3(link, [4, 5, 0, 5])
+        link.sublink3 = SubLink3(link, [("L", 4), ("T", 5), ("T", 0), ("TR", 5)])
         return link

@@ -38,6 +38,10 @@ class LinkReader(DataReader):
 
     @staticmethod
     def create_sublinks(link, args):
+        # TODO read from each lane type
+        # lane type format:
+        # L,LT,T,TR,LTR
+        # 4,0,4,0,5
         lane_num = max(1, len([x for x in [args["L"], args["T1"], args["T2"], args["R"]] if int(x) > 0]) - 1)
         link.sublink1 = SubLink1(link, lane_num)
         link.sublink2 = SubLink2(link, lane_num)

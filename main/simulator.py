@@ -3,7 +3,9 @@ from util.observer import Observer
 from reader.link_reader import LinkReader
 from reader.link2link_reader import Link2LinkReader
 from reader.car_reader import CarReader
+from reader.signal_reader import SignalReader
 from reader.path_reader import PathReader
+
 from helper.traffic_generator import *
 
 
@@ -26,12 +28,12 @@ class Simulator(Observer):
 
     def setup_system(self):
         self.traffic_generator.register_observer(self)
-        self.traffic_generator.generate_traffic(car_num_eff=.1)
+        self.traffic_generator.generate_traffic(car_num_eff=.3) # .1=>131, .3=>975
 
         self.setup_links()
         self.setup_link2links()
         self.setup_cars()
-        self.setup_signals()
+        self.setup_signal()
         self.setup_paths()
 
     def setup_links(self):
@@ -60,18 +62,9 @@ class Simulator(Observer):
 
         self.cars.sort(key=lambda c: c.start_time, reverse=True)
 
-    def setup_signals(self):
-        # TODO replace with
-        f = open('../data/signal_2.csv')
-        f.readline()
-        for line in f:
-            data = line.strip().split(',')
-            link_id = data[0] if data[0] else link_id
-            link_id = int(link_id)
-            direction = data[1]
-            if direction in ["T", "R", "L"]:
-                self.links[link_id].sublink3.setup_signal(direction, data[2:])
-        self.total_time = len(data[2:])
+    def setup_siganl(self):
+        for signal in self.signal_reader.signals:
+            self.links[signal.link_id].signal = signal
 
     def setup_paths(self):
         for path in self.path_reader.paths:
@@ -96,7 +89,7 @@ class Simulator(Observer):
         Time().update_time()
 
     def print_status(self):
-        self.notify(None, "==== Time Stamp %ds =====" % (Time().time * 10))
+        self.notify(None, "==== Time Stamp %ds =====" % (Time().time * Time().time_stamp))
 
     def unleash_cars(self):
         while self.cars and self.cars[-1].start_time <= Time().time:
@@ -104,8 +97,12 @@ class Simulator(Observer):
             self.links[car.path[0]].add_car(car)
 
     def release_cars(self):
+        released_links = set()
         for link in self.links.values():
-            link.release_cars()
+            if link.link_id not in released_links:
+                link.release_cars()
+                released_links.add(link)
+                released_links.add(link.conflict_link)
 
         # reset link status after release
         for link in self.links.values():

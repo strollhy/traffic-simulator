@@ -19,3 +19,7 @@ class Time(object):
 
     def reset(self):
         self._time = 0
+
+    @property
+    def time_stamp(self):
+        return 10

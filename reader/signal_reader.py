@@ -2,7 +2,7 @@ from data_reader import DataReader
 from model.signal import Signal
 from helper.attribute_helper import AttributeHelper
 
-SINGALS = '../data/signal_simple.csv'
+SINGALS = '../data/signal_sample.csv'
 
 
 class SignalReader(DataReader):
