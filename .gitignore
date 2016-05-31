@@ -1,6 +1,0 @@
-.idea
-.*
-*.pyc
-*.DS_Store
-data/output
-test/test_data

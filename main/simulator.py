@@ -62,8 +62,8 @@ class Simulator(Observer):
 
         self.cars.sort(key=lambda c: c.start_time, reverse=True)
 
-    def setup_siganl(self):
-        for signal in self.signal_reader.signals:
+    def setup_signal(self):
+        for signal in SignalReader().signals:
             self.links[signal.link_id].signal = signal
 
     def setup_paths(self):

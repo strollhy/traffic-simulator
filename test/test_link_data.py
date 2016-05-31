@@ -15,8 +15,8 @@ class TestLinkData(unittest.TestCase):
     def test_link_data_match(self):
         for link2link in self.link2link_reader.link2links:
             link_id = link2link.link_id
-            self.assertIn(link_id, self.links)
-
+            if link_id not in self.links:
+                self.assertIn(link_id, self.links)
 
 if __name__ == '__main__':
     unittest.main()
