@@ -34,16 +34,15 @@ class SubLink2(SubLink):
             car_released = False
             for lane_number, lane in enumerate(self.lanes):
                 if not lane or lane[0].is_blocked:
-                    break
+                    continue
 
                 car = lane[0]
                 available_lane = self.find_available_lane(car, lane_number)
                 if available_lane:
-                    available_lane.add(self.__release_car(lane_number))
+                    available_lane.add_car(self.__release_car(lane_number))
                     car_released = True
                 else:
-                    car.set_blocked("No space left on merging zone. %d"
-                                    % (self.next_link.group_capacity(car.lane_group)))
+                    car.set_blocked("%s" % self.next_link.lanes.__repr__())
         # reset car status for next time stamp
         for lane in self.lanes:
             for car in lane:
@@ -62,8 +61,9 @@ class SubLink2(SubLink):
 
         if car.lane_group == "L":
             i, lane = available_lanes.pop()
-            if "L" in lane.type and i + 1 < len(self.next_link.lanes()):
-                if self.next_link.lanes[i + 1].empty_space:
+            if "L" in lane.type and i + 1 < len(self.next_link.lanes):
+                adjacent_lane = self.next_link.lanes[i + 1]
+                if "T" not in adjacent_lane.type or adjacent_lane.empty_space:
                     return lane
             else:
                 return lane
@@ -75,5 +75,6 @@ class SubLink2(SubLink):
             else:
                 return lane
         else:
-            lanes = [lane for (i, lane) in available_lanes if abs(lane_number - i) < 2]
-            return random.sample(lanes, 1)[0]
+            # lanes = [lane for (i, lane) in available_lanes if abs(lane_number - i) < 2]
+            lanes = [lane for (i, lane) in available_lanes]
+            return random.sample(lanes, 1)[0] if lanes else None

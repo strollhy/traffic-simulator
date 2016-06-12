@@ -6,7 +6,7 @@ from helper.traffic_generator import TrafficGenerator
 from reader.path_reader import PathReader
 
 ROUNDS = 10
-TMP_PATH_FILE = '../data/output/tmp_path.csv'
+TMP_PATH_FILE = '../data/output/balanced_path.csv'
 
 
 class LoadBalancer(Observer):
@@ -14,14 +14,14 @@ class LoadBalancer(Observer):
         self.simulate_rounds = rounds
 
         self.simulator = Simulator()
-        self.simulator.mute = True
+        self.simulator.mute = True      # Disable system display
 
     def start(self):
-        for run in xrange(self.simulate_rounds):
-            print "========= Round %d =========" % run
+        for round in xrange(self.simulate_rounds):
+            print "========= Round %d =========" % round
 
             self.simulator.start()
-            self.post_simulation(run)
+            self.post_simulation(round)
 
             self.simulator.traffic_generator = TrafficGenerator(filename=TMP_PATH_FILE)
             self.simulator.path_reader = PathReader(TMP_PATH_FILE)

@@ -37,7 +37,7 @@ class ReaderTest(unittest.TestCase):
     def test_link_creation(self):
         for link in self.link_reader.links:
             self.assertIsInstance(link.link_id, int)
-            self.assertIsInstance(link.length, int)
+            self.assertIsInstance(link.length, float)
             self.assertIsInstance(link.lanes_num, int)
             self.assertIsInstance(link.min_speed, int)
             self.assertIsInstance(link.max_speed, int)
@@ -47,10 +47,6 @@ class ReaderTest(unittest.TestCase):
             self.assertIsInstance(link.sublink1, SubLink1)
             self.assertIsInstance(link.sublink2, SubLink2)
             self.assertIsInstance(link.sublink3, SubLink3)
-
-    def test_link2link_creation(self):
-        # TODO test link2link
-        pass
 
 if __name__ == '__main__':
     unittest.main()

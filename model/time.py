@@ -15,7 +15,7 @@ class Time(object):
         return self._time
 
     def update_time(self):
-        self._time += 1
+        self._time += self.time_stamp
 
     def reset(self):
         self._time = 0

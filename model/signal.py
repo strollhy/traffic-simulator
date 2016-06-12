@@ -1,5 +1,6 @@
 from time import Time
 
+
 class Signal(object):
     def __init__(self):
         self.link_id = None
@@ -9,7 +10,7 @@ class Signal(object):
         self.end_time = None
 
     def __repr__(self):
-        return "link_id: %d, lane_type: %s" % (self.link_id, self.lane_type)
+        return "link_id: %d, type: %s" % (self.link_id, self.lane_type)
 
-    def is_green(self):
-        return self.green_start_time <= Time().time % self.cycle_length <= self.end_time
+    def is_green(self, relative_time):
+        return self.green_start_time <= (Time().time + relative_time) % self.cycle_length <= self.end_time

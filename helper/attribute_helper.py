@@ -3,7 +3,7 @@ class AttributeHelper:
     def assign_attribute(obj, args):
         for key, val in args.items():
             try:
-                val = int(val)
+                val = float(val) if "." in val else int(val)
             except:
                 pass
             finally:

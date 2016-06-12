@@ -24,8 +24,13 @@ class TestSimulator(unittest.TestCase):
                           self.simulator.cars)
 
     def test_setup_lights(self):
-        # TODO add signal tests
-        pass
+        self.simulator.setup_links()
+        self.simulator.setup_signal()
+        for link in self.simulator.links.values():
+            if link.type == "normal":
+                for lane in link.sublink3.lanes:
+                    if not lane.signal:
+                        print "Link %s has no %s signal" % (link.link_id, lane.type)
 
     def test_setup_paths(self):
         self.simulator.setup_paths()

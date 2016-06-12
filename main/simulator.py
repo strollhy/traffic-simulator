@@ -13,7 +13,7 @@ class Simulator(Observer):
     def __init__(self):
         super(Simulator, self).__init__()
         Time()
-        self.total_time = 0
+        self.total_time = 1000
         self.cars = []
         self.links = {}
         self.paths = {}
@@ -28,7 +28,7 @@ class Simulator(Observer):
 
     def setup_system(self):
         self.traffic_generator.register_observer(self)
-        self.traffic_generator.generate_traffic(car_num_eff=.3) # .1=>131, .3=>975
+        self.traffic_generator.generate_traffic(car_num_eff=.2)
 
         self.setup_links()
         self.setup_link2links()
@@ -64,7 +64,9 @@ class Simulator(Observer):
 
     def setup_signal(self):
         for signal in SignalReader().signals:
-            self.links[signal.link_id].signal = signal
+            for lane in self.links[signal.link_id].sublink3.lanes:
+                if set(signal.lane_type.upper()) & set(lane.type):
+                    lane.signal = signal
 
     def setup_paths(self):
         for path in self.path_reader.paths:
@@ -92,14 +94,17 @@ class Simulator(Observer):
         self.notify(None, "==== Time Stamp %ds =====" % (Time().time * Time().time_stamp))
 
     def unleash_cars(self):
-        while self.cars and self.cars[-1].start_time <= Time().time:
-            car = self.cars.pop()
-            self.links[car.path[0]].add_car(car)
+        i = len(self.cars) - 1
+        while i >= 0 and self.cars[i].start_time <= Time().time:
+            if self.links[self.cars[i].current_link].capacity > 0:
+                car = self.cars.pop(i)
+                self.links[car.current_link].add_car(car)
+            i -= 1
 
     def release_cars(self):
         released_links = set()
         for link in self.links.values():
-            if link.link_id not in released_links:
+            if link.type != "out" and link.link_id not in released_links:
                 link.release_cars()
                 released_links.add(link)
                 released_links.add(link.conflict_link)

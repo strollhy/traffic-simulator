@@ -20,8 +20,9 @@ class LinkReader(DataReader):
     def links(self):
         if self._links is None:
             self._links = []
-            for row in self:
+            for i, row in enumerate(self):
                 link = self.create_link(row)
+                link.normalized_id = i + 1
                 if link:
                     self._links.append(link)
         return self._links
@@ -42,7 +43,7 @@ class LinkReader(DataReader):
         lane_types = ["L","LT","T1","T2","T3","LTR","TR","R"]
         link.sublink1 = SubLink1(link, args["lanes_num"])
         link.sublink2 = SubLink2(link, args["lanes_num"])
-        link.sublink3 = SubLink3(link, [(k, args[k]) for k in lane_types if args[k]])
+        link.sublink3 = SubLink3(link, [(k, int(args[k])) for k in lane_types if args[k]])
 
 if __name__ == "__main__":
     reader = LinkReader()

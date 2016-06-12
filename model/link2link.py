@@ -7,4 +7,4 @@ class Link2Link(object):
         self.conflict_link_id = None
 
     def __repr__(self):
-        return "%s, %s, %s" % (self.link_id, self.left_link_id, self.right_link_id)
+        return "[%s: %s, %s, %s]" % (self.link_id, self.left_link_id, self.right_link_id, self.through_link_id)

@@ -7,6 +7,7 @@ class Lane:
         self.overshoot_time = 0
         self.type = None
         self.link = None
+        self.signal = None
         self.first_right = True
         self.cars = []
 
@@ -17,7 +18,7 @@ class Lane:
         self.pedestrian_time = 2
 
     def __repr__(self):
-        return "link: %d, capacity: %d" % (self.link, self.capacity)
+        return "<Type:%s Cap:%d Cars:%s>" % (self.type, self.empty_space, self.cars)
 
     @property
     def car_num(self):
@@ -34,25 +35,23 @@ class Lane:
         else:
             self._conflict_lanes = []
             if self.link.conflict_link:
-                for lane in self.link.conflict_link:
+                for lane in self.link.conflict_link.sublink3.lanes:
                     if "T" in lane.type:
                         self._conflict_lanes.append(lane)
             return self._conflict_lanes
 
     @property
     def is_green(self):
-        return self.link.signal.is_green()
+        return self.signal.is_green(self.link.relative_time)
 
     def can_release(self):
-        return self.is_green \
-               and self.cars \
-               and self.link.next_link[self.cars[0].lane_group].capacity > 0
+        return self.is_green and self.car_num #and self.link.next_link[self.cars[0].lane_group].capacity > 0
 
     def add_car(self, car):
         self.cars.append(car)
 
     def remove_car(self):
-        return self.cars.pop(0)
+        return self.cars.pop()
 
     def release_cars(self, granted_time):
         if self.can_release():
@@ -79,9 +78,11 @@ class Lane:
 
     def _release_car(self, car):
         car = self.cars.pop()
-        self.headway_indx += 1
+        car.move_on()
+
         self.link.next_link[car.lane_group].add_car(car)
-        return self.headway[self.headway_indx - 1]
+        self.headway_indx += 1
+        return self.headway[min(self.headway_indx - 1, len(self.headway)-1)]
 
     def release_time(self, car):
         # TODO normal release time plus headway
@@ -89,15 +90,17 @@ class Lane:
 
     def _release_left_group(self, car):
         conflict_lanes = self.conflict_lanes
-
         used_time = 0
-        if not conflict_lanes or not [l for l in conflict_lanes if l.can_release()]:
+        if not conflict_lanes:
             used_time += self._release_car(car)
         else:
-            conflict_release_time = []
+            conflict_release_time = [0]
             for conflict_lane in conflict_lanes:
+                if not conflict_lane.can_release():
+                    continue
+
                 conflict_car = conflict_lane.cars[0]
-                if conflict_car.type == "T":
+                if conflict_car.lane_group == "T":
                     through_time = conflict_lane.release_time(car) + self.pT
                     if abs(through_time - self.pL) <= .1:
                         conflict_release_time.append(through_time)

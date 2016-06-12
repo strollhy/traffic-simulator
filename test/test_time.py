@@ -13,7 +13,7 @@ class TestTime(unittest.TestCase):
     def test_update_time(self):
         current_time = Time().time
         Time().update_time()
-        self.assertEquals(current_time + 1, Time().time)
+        self.assertEquals(current_time + 10, Time().time)
 
 
 if __name__ == '__main__':

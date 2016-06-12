@@ -8,15 +8,16 @@ class Link(Observable):
         super(Link, self).__init__()
 
         self.link_id = None
+        self.normalized_id = None
         self.length = None
-        self.lanes = None
+        self.lanes_num = None
         self.max_cap = None
         self.next_link = {"T": None, "L": None, "R": None}
         self.conflict_link = None
         self.sublink1 = self.sublink2 = self.sublink3 = None
-        self.signal = None
         self.type = None
 
+        self.relative_time = 0
         self.min_speed = 5
         self.max_speed = 45
         self.jam_density = 220
@@ -24,7 +25,10 @@ class Link(Observable):
         self.avg_speed = 0
 
     def __repr__(self):
-        return "#%s %s [cap: %d %d %d %d]" % (self.link_id, self.type, self.capacity, self.sublink1.car_num, self.sublink2.car_num, self.sublink3.car_num)
+        return "#%s(%s) %s [l:%s] %s" % (self.link_id, self.normalized_id, self.type, self.length, self.__cap__())
+
+    def __cap__(self):
+        return "[cap: %d %d %d %d]" % (self.capacity, self.sublink1.car_num, self.sublink2.car_num, self.sublink3.car_num)
 
     @property
     def capacity(self):
@@ -35,6 +39,7 @@ class Link(Observable):
         self.notify_observers("Car %s reaches link %s" % (car, self))
 
         if self.car_can_proceed(car):
+            #TODO fix car.od
             if car.od in self.simulator.paths and car.path_id in self.simulator.paths[car.od]:
                 self.simulator.paths[car.od][car.path_id].elapse_time += car.arrive_time - car.start_time
             # print car.path_id, car.arrive_time - car.start_time
@@ -46,7 +51,6 @@ class Link(Observable):
         if car.reach_destination() or not self.assign_lane_group(car):
             return False
         else:
-            car.move_on()
             return True
 
     def assign_lane_group(self, car):
@@ -75,7 +79,7 @@ class Link(Observable):
     def calculate_density(self):
         x = self.sublink2.car_num + self.sublink3.car_num
         N = x + self.sublink1.car_num
-        n = self.num_of_lanes
+        n = self.lanes_num
         l = self.length
         rho = (N-x)/(n*l-x/self.jam_density + .1)
         return rho
@@ -85,13 +89,14 @@ class Link(Observable):
         if self.conflict_link:
             self.conflict_link.sublink1.release_cars()
 
-        t = 0
-        while t < Time().time_stamp:
-            tao = min([lane for lane in [lanes for lanes in self.sublink3.lanes.values]]) * 1.5
-            tao = min(tao, min([lane for lane in [lanes for lanes in self.conflict_link.sublink3.lanes.values]])) if self.conflict_link else tao
+        self.relative_time = 0
+        while self.relative_time < Time().time_stamp:
+            tao = min([len(lane.cars) for lane in self.sublink3.lanes]) * 1.5
+            tao = min(tao, min([len(lane.cars) for lane in self.conflict_link.sublink3.lanes])) if self.conflict_link else tao
+            tao = max(tao, 1.5)
             self.sublink2.release_cars()
             self.sublink3.release_cars(tao)
-            t += tao
+            self.relative_time += tao
 
     def post_release(self):
         pass

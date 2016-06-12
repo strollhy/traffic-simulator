@@ -2,7 +2,7 @@ from data_reader import DataReader
 from model.path import Path
 from helper.attribute_helper import AttributeHelper
 
-PATHS = '../data/output/seed_path.csv'
+PATHS = '../data/output/allocation_path.csv'
 
 
 class PathReader(DataReader):
