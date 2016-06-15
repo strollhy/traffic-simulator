@@ -28,7 +28,7 @@ class Simulator(Observer):
 
     def setup_system(self):
         self.traffic_generator.register_observer(self)
-        self.traffic_generator.generate_traffic(car_num_eff=.2)
+        self.traffic_generator.generate_traffic(time_interval=self.total_time-200, car_num_eff=.2)
 
         self.setup_links()
         self.setup_link2links()

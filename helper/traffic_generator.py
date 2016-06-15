@@ -3,7 +3,7 @@ from util.observer import Observable
 from reader.link_reader import LinkReader
 
 od_pairs = {}
-time_interval = 800
+TIME_INTERVAL = 800
 # CAR_NUM_EFF = .017
 # INPUT_FILENAME = "../data/output/seed_path.csv"
 CAR_NUM_EFF = .09
@@ -28,7 +28,7 @@ class TrafficGenerator(Observable):
             path = "-".join([str(self.links[int(l)].link_id) for l in path.split('-')])
         return path
 
-    def generate_traffic(self, car_num_eff=CAR_NUM_EFF):
+    def generate_traffic(self, time_interval=TIME_INTERVAL, car_num_eff=CAR_NUM_EFF):
         self.notify_observers("========== Start generating traffic ==========")
         fin = open(self.filename)
         fout = open('../data/output/car.csv', 'w')
@@ -40,7 +40,7 @@ class TrafficGenerator(Observable):
             path, car_num = line.strip().split(',')
             path = self.denormalize_path(path, True)          # Decide whether to de-normalize link ids
             for _ in xrange(int(int(car_num) * car_num_eff)):
-                start_time = random.randint(0, 180)
+                start_time = random.randint(0, time_interval)
                 fout.write("%d,%d,%s\n" % (car_id, start_time, path))
                 car_id += 1
         self.notify_observers("========== Generating finished, %d cars created ==========" % car_id)
@@ -72,7 +72,7 @@ class TrafficGenerator(Observable):
                 path = data[2]
                 distance = data[3]
                 for _ in xrange(int(int(car_num) * car_num_eff/len(path_group))):
-                    start_time = random.randint(0, time_interval)
+                    start_time = random.randint(0, TIME_INTERVAL)
                     fout.write("%d,%d,%s\n" % (car_id, start_time, path))
                     car_id += 1
 
