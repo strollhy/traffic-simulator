@@ -13,7 +13,7 @@ class Simulator(Observer):
     def __init__(self):
         super(Simulator, self).__init__()
         Time()
-        self.total_time = 1000
+        self.total_time = 3600
         self.cars = []
         self.links = {}
         self.paths = {}
@@ -28,7 +28,7 @@ class Simulator(Observer):
 
     def setup_system(self):
         self.traffic_generator.register_observer(self)
-        self.traffic_generator.generate_traffic(time_interval=self.total_time-200, car_num_eff=.2)
+        self.traffic_generator.generate_traffic(time_interval=self.total_time-200, car_num_eff=1)
 
         self.setup_links()
         self.setup_link2links()
@@ -83,6 +83,10 @@ class Simulator(Observer):
         while self.total_time > Time().time:
             self.next_time_stamp()
 
+        # print "#########################"
+        # for link in self.links.values():
+        #     print "%s, %d" % (link, link.traffic_vol)
+
     def next_time_stamp(self):
         self.print_status()
         self.unleash_cars()
@@ -98,8 +102,13 @@ class Simulator(Observer):
         while i >= 0 and self.cars[i].start_time <= Time().time:
             if self.links[self.cars[i].current_link].capacity > 0:
                 car = self.cars.pop(i)
+                self.normalize_car_path(car)
                 self.links[car.current_link].add_car(car)
             i -= 1
+
+    def normalize_car_path(self, car):
+        car.od = (self.links[car.current_link].normalized_id, self.links[car.path[-1]].normalized_id)
+        car.path_id = "-".join([str(self.links[l].normalized_id) for l in car.path])
 
     def release_cars(self):
         released_links = set()
@@ -108,10 +117,6 @@ class Simulator(Observer):
                 link.release_cars()
                 released_links.add(link)
                 released_links.add(link.conflict_link)
-
-        # reset link status after release
-        for link in self.links.values():
-            link.post_release()
 
     def update_links(self):
         for link in self.links.values():

@@ -5,23 +5,23 @@ from model.time import Time
 from helper.traffic_generator import TrafficGenerator
 from reader.path_reader import PathReader
 
-ROUNDS = 10
+TURNS = 10
 TMP_PATH_FILE = '../data/output/balanced_path.csv'
 
 
 class LoadBalancer(Observer):
-    def __init__(self, rounds):
-        self.simulate_rounds = rounds
+    def __init__(self, turns):
+        self.simulate_turns = turns
 
         self.simulator = Simulator()
         self.simulator.mute = True      # Disable system display
 
     def start(self):
-        for round in xrange(self.simulate_rounds):
-            print "========= Round %d =========" % round
+        for turn in xrange(self.simulate_turns):
+            print "========= Round %d =========" % turn
 
             self.simulator.start()
-            self.post_simulation(round)
+            self.post_simulation(turn)
 
             self.simulator.traffic_generator = TrafficGenerator(filename=TMP_PATH_FILE)
             self.simulator.path_reader = PathReader(TMP_PATH_FILE)
@@ -37,10 +37,9 @@ class LoadBalancer(Observer):
         new_total = 0
         for od, paths in self.simulator.paths.items():
             # for each path with the same od pair
-            total_num = 0
             new_total_num = 0
+            od_total_num = 0
             step = run + 9
-            min_cost = 999999999
 
             sorted_path = sorted([path for path in paths.values()], key=lambda x: x.avg_time())
             total_num = sum([path.car_num for path in sorted_path])
@@ -59,7 +58,7 @@ class LoadBalancer(Observer):
                     new_car_num = int(math.floor(car_num * (step - 1.0) / step))
 
                 new_total_num += new_car_num
-                # fout.write('-'.join(path.nodes) + ',' + str(new_car_num) + "\n")
+                # od_total_num += car_num
                 cached_num.append(new_car_num)
                 a += cost * new_car_num
 
@@ -67,17 +66,17 @@ class LoadBalancer(Observer):
             all_total += total_num
             new_total += new_total_num
 
-            # print total_num, new_total_num
-            lost = total_num - new_total_num
-            while lost != 0:
-                for i in xrange(len(cached_num)):
-                    cached_num[i] += lost/abs(lost)
-                    lost += - lost/abs(lost)
-                    if lost == 0:
-                        break
+            # lost = total_num - new_total_num
+            # while lost != 0:
+            #     for i in xrange(len(cached_num)):
+            #         cached_num[i] += lost/abs(lost)
+            #         lost += - lost/abs(lost)
+            #         if lost == 0:
+            #             break
 
             for i, path in enumerate(sorted_path):
-                fout.write(path.__str__() + ',' + str(cached_num[i]) + "\n")
+                if cached_num[i]:
+                    fout.write("%s,%d\n" % (path.__str__(), cached_num[i]))
 
         print a, b
         print (a - b) / (b + 0.1)
@@ -85,4 +84,4 @@ class LoadBalancer(Observer):
         fout.close()
 
 if __name__ == "__main__":
-    LoadBalancer(ROUNDS).start()
+    LoadBalancer(TURNS).start()

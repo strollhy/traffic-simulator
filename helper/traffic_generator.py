@@ -6,7 +6,7 @@ od_pairs = {}
 TIME_INTERVAL = 800
 # CAR_NUM_EFF = .017
 # INPUT_FILENAME = "../data/output/seed_path.csv"
-CAR_NUM_EFF = .09
+CAR_NUM_EFF = 1
 INPUT_FILENAME = "../data/output/allocation_path.csv"
 
 

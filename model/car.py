@@ -9,6 +9,7 @@ class Car(Observable):
         self.start_time = None
         self.path = None
         self.od = None
+        self.path_id = None
 
         self.current_step = 0
         self.distance = 0
