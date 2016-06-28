@@ -5,7 +5,7 @@ from model.time import Time
 from helper.traffic_generator import TrafficGenerator
 from reader.path_reader import PathReader
 
-TURNS = 10
+TURNS = 20
 TMP_PATH_FILE = '../data/output/balanced_path.csv'
 
 
@@ -39,7 +39,7 @@ class LoadBalancer(Observer):
             # for each path with the same od pair
             new_total_num = 0
             od_total_num = 0
-            step = run + 9
+            step = run + 4
 
             sorted_path = sorted([path for path in paths.values()], key=lambda x: x.avg_time())
             total_num = sum([path.car_num for path in sorted_path])

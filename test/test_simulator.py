@@ -19,9 +19,9 @@ class TestSimulator(unittest.TestCase):
 
     def test_setup_cars(self):
         self.simulator.setup_cars()
-        self.assertIsNotNone(self.simulator.cars)
-        self.assertEquals(sorted(self.simulator.cars, key=lambda c: c.start_time, reverse=True),
-                          self.simulator.cars)
+        self.assertIsNotNone(self.simulator.car_queue)
+        self.assertEquals(sorted(self.simulator.car_queue, key=lambda c: c.start_time, reverse=True),
+                          self.simulator.car_queue)
 
     def test_setup_lights(self):
         self.simulator.setup_links()

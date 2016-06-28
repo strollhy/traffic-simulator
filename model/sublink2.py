@@ -42,7 +42,7 @@ class SubLink2(SubLink):
                     available_lane.add_car(self.__release_car(lane_number))
                     car_released = True
                 else:
-                    car.set_blocked("%s" % self.next_link.lanes.__repr__())
+                    car.set_blocked("%s" % self.next_link.__repr__())
         # reset car status for next time stamp
         for lane in self.lanes:
             for car in lane:

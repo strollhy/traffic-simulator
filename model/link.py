@@ -16,6 +16,7 @@ class Link(Observable):
         self.conflict_link = None
         self.sublink1 = self.sublink2 = self.sublink3 = None
         self.type = None
+        self.simulator = None
 
         self.relative_time = 0
         self.min_speed = 5
@@ -29,7 +30,7 @@ class Link(Observable):
         return "#%s(%s) %s [l:%s] %s" % (self.link_id, self.normalized_id, self.type, self.length, self.__cap__())
 
     def __cap__(self):
-        return "[cap: %d %d %d %d]" % (self.capacity, self.sublink1.car_num, self.sublink2.car_num, self.sublink3.car_num)
+        return "[cap: %d %d %d %d]" % (self.max_cap, self.sublink1.car_num, self.sublink2.car_num, self.sublink3.car_num)
 
     @property
     def capacity(self):
@@ -42,6 +43,8 @@ class Link(Observable):
         if self.car_can_proceed(car):
             self.sublink1.add_car(car)
             self.traffic_vol += 1
+        else:
+            del self.simulator.cars[car.car_id]
 
     def car_can_proceed(self, car):
         if car.reach_destination():
@@ -52,6 +55,14 @@ class Link(Observable):
         else:
             return True
 
+    def add_path_cost(self, car):
+        try:
+            time_ratio = 0.1
+            # if self.simulator.total_time * time_ratio <= car.start_time <= self.simulator.total_time * (1-time_ratio):
+            self.simulator.paths[car.od][car.path_id].elapse_time += car.arrive_time - car.start_time
+        except Exception:
+            pass
+
     def assign_lane_group(self, car):
         heading_link = car.next_link
         if heading_link:
@@ -61,10 +72,6 @@ class Link(Observable):
                     return True
         self.notify_observers("Car %s reaches dead end, couldn't find a path" % car)
         return False
-
-    def add_path_cost(self, car):
-        if car.od in self.simulator.paths and car.path_id in self.simulator.paths[car.od]:
-            self.simulator.paths[car.od][car.path_id].elapse_time += car.arrive_time - car.start_time
 
     def update_status(self):
         self.calculate_velocity()
@@ -77,7 +84,7 @@ class Link(Observable):
         rho_jam = 220.0
         alpha = 1.2
         beta = 1.8
-        self.avg_speed = v_min + (v_free - v_min) * (1-(max(1, rho/rho_jam))**alpha)**beta
+        self.avg_speed = v_min + (v_free - v_min) * ((1-min(1, rho/rho_jam))**alpha)**beta
 
     def calculate_density(self):
         x = self.sublink2.car_num + self.sublink3.car_num

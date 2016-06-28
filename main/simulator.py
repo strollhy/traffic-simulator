@@ -14,8 +14,9 @@ class Simulator(Observer):
         super(Simulator, self).__init__()
         Time()
         self.total_time = 3600
-        self.cars = []
+        self.car_queue = []
         self.links = {}
+        self.cars = {}
         self.paths = {}
 
         self.path_reader = PathReader()
@@ -28,7 +29,7 @@ class Simulator(Observer):
 
     def setup_system(self):
         self.traffic_generator.register_observer(self)
-        self.traffic_generator.generate_traffic(time_interval=self.total_time-200, car_num_eff=1)
+        self.traffic_generator.generate_traffic(time_interval=int(self.total_time), car_num_eff=2)
 
         self.setup_links()
         self.setup_link2links()
@@ -58,9 +59,10 @@ class Simulator(Observer):
     def setup_cars(self):
         for car in CarReader().cars:
             car.register_observer(self)
-            self.cars.append(car)
+            self.car_queue.append(car)
+            self.cars[car.car_id] = car
 
-        self.cars.sort(key=lambda c: c.start_time, reverse=True)
+        self.car_queue.sort(key=lambda c: c.start_time, reverse=True)
 
     def setup_signal(self):
         for signal in SignalReader().signals:
@@ -80,12 +82,22 @@ class Simulator(Observer):
         self.update_links()
 
     def start_simulation(self):
-        while self.total_time > Time().time:
-            self.next_time_stamp()
+        # while self.total_time > Time().time:
+        #     self.next_time_stamp()
 
-        # print "#########################"
-        # for link in self.links.values():
-        #     print "%s, %d" % (link, link.traffic_vol)
+        clear_count = 0
+        while self.cars and clear_count < 200:
+            existing_car_cnt = len(self.cars)
+            self.next_time_stamp()
+            if existing_car_cnt == len(self.cars):
+                clear_count += 1
+            else:
+                clear_count = 0
+
+        self.notify(None, "############ TIME STAMP %ds #############" % Time().time)
+        self.notify(None, self.cars)
+        for link in self.links.values():
+            self.notify(None, "%s, %d" % (link, link.traffic_vol))
 
     def next_time_stamp(self):
         self.print_status()
@@ -95,15 +107,15 @@ class Simulator(Observer):
         Time().update_time()
 
     def print_status(self):
-        self.notify(None, "==== Time Stamp %ds =====" % (Time().time * Time().time_stamp))
+        self.notify(None, "==== Time Stamp %ds =====" % Time().time)
 
     def unleash_cars(self):
-        i = len(self.cars) - 1
-        while i >= 0 and self.cars[i].start_time <= Time().time:
-            if self.links[self.cars[i].current_link].capacity > 0:
-                car = self.cars.pop(i)
-                self.normalize_car_path(car)
-                self.links[car.current_link].add_car(car)
+        i = len(self.car_queue) - 1
+        while i >= 0 and self.car_queue[i].start_time <= Time().time:
+            # if self.links[self.car_queue[i].current_link].capacity > 0:
+            car = self.car_queue.pop(i)
+            self.normalize_car_path(car)
+            self.links[car.current_link].add_car(car)
             i -= 1
 
     def normalize_car_path(self, car):

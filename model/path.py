@@ -12,5 +12,6 @@ class Path:
 
     def avg_time(self):
         if not self.elapse_time:
-            return 10
-        return self.car_num / self.elapse_time
+            return 1200
+        else:
+            return self.car_num / self.elapse_time

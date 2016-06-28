@@ -30,9 +30,13 @@ class LinkReader(DataReader):
     @staticmethod
     def create_link(args):
         # change to miles, if no length is provided, assume infinite
+        args["max_cap"] = int(args["length"]) / 8
         args["length"] = float(args["length"]) * 0.000189394 if args["length"] else 200
-        args["max_cap"] = int(args["length"] / 0.00279617)
         args["lanes_num"] = int(args["lanes_num"]) if args["lanes_num"] else 0
+
+        # args["length"] = float(args["length"]) if args["length"] else 99999999
+        # args["lanes_num"] = int(args["lanes_num"]) if args["lanes_num"] else 0
+        # args["max_cap"] = int(args["length"] / 8) * args["lanes_num"]
 
         link = Link()
         LinkReader.create_sublinks(link, args)

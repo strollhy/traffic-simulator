@@ -39,7 +39,7 @@ class MapRender:
             out_file.write("%d %d %d\n" % (l1, l2, cost))
 
     def rend_normalized_od(self):
-        in_file = open("../data/od.csv", "r")
+        in_file = open("../data/output/ods.csv", "r")
         out_file = open("../data/normalized_od.csv", "w")
         for line in in_file:
             l1, l2, car_num = line.split(',')
