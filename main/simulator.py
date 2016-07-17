@@ -21,15 +21,17 @@ class Simulator(Observer):
 
         self.path_reader = PathReader()
         self.traffic_generator = TrafficGenerator()
+        self.turn = 1
 
-    def start(self):
+    def start(self, turn=1):
         self.setup_system()
         self.init_links()
         self.start_simulation()
+        self.turn = turn
 
     def setup_system(self):
         self.traffic_generator.register_observer(self)
-        self.traffic_generator.generate_traffic(time_interval=int(self.total_time), car_num_eff=2)
+        self.traffic_generator.generate_traffic(time_interval=int(self.total_time), car_num_eff=.7)
 
         self.setup_links()
         self.setup_link2links()
@@ -96,8 +98,13 @@ class Simulator(Observer):
 
         self.notify(None, "############ TIME STAMP %ds #############" % Time().time)
         self.notify(None, self.cars)
+        f1 = open("../data/output/out_volume_%d.csv" % self.turn, "w")
+        f2 = open("../data/output/out_density_%d.csv" % self.turn, "w")
+        f3 = open("../data/output/out_speed_%d.csv" % self.turn, "w")
         for link in self.links.values():
-            self.notify(None, "%s, %d" % (link, link.traffic_vol))
+            f1.write("%s:%s\n" % (link.link_id, ",".join(link.check_points["vol"])))
+            f2.write("%s:%s\n" % (link.link_id, ",".join(link.check_points["den"])))
+            f3.write("%s:%s\n" % (link.link_id, ",".join(link.check_points["speed"])))
 
     def next_time_stamp(self):
         self.print_status()
@@ -133,7 +140,6 @@ class Simulator(Observer):
     def update_links(self):
         for link in self.links.values():
             link.update_status()
-
 
 if __name__ == '__main__':
     simulator = Simulator()

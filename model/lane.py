@@ -45,7 +45,7 @@ class Lane:
         return self.signal.is_green(self.link.relative_time)
 
     def can_release(self):
-        return self.is_green and self.car_num #and self.link.next_link[self.cars[0].lane_group].capacity > 0
+        return self.is_green and self.car_num and self.link.next_link[self.cars[0].lane_group].capacity > 0
 
     def add_car(self, car):
         self.cars.append(car)

@@ -1,4 +1,5 @@
 import math
+import random
 from simulator import Simulator
 from util.observer import Observer
 from model.time import Time
@@ -20,7 +21,7 @@ class LoadBalancer(Observer):
         for turn in xrange(self.simulate_turns):
             print "========= Round %d =========" % turn
 
-            self.simulator.start()
+            self.simulator.start(turn)
             self.post_simulation(turn)
 
             self.simulator.traffic_generator = TrafficGenerator(filename=TMP_PATH_FILE)
@@ -52,7 +53,11 @@ class LoadBalancer(Observer):
                 if i == 0:
                     min_cost = cost
                     new_car_num = int(math.ceil((car_num * (step - 1.0) + total_num * 1.0) / step))
-                elif 0 < i < len(sorted_path) / 2:
+                # elif 0 < i < len(sorted_path) / 2:
+                #     new_car_num = int(math.ceil(car_num * (step - 1.0) / step))
+                # else:
+                #     new_car_num = int(math.floor(car_num * (step - 1.0) / step))
+                elif random.randint(0, 100) < 50:
                     new_car_num = int(math.ceil(car_num * (step - 1.0) / step))
                 else:
                     new_car_num = int(math.floor(car_num * (step - 1.0) / step))

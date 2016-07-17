@@ -25,6 +25,7 @@ class Link(Observable):
         self.num_of_cars = 0
         self.avg_speed = 0
         self.traffic_vol = 0
+        self.check_points = {"vol":[], "den":[], "speed":[]}
 
     def __repr__(self):
         return "#%s(%s) %s [l:%s] %s" % (self.link_id, self.normalized_id, self.type, self.length, self.__cap__())
@@ -75,6 +76,11 @@ class Link(Observable):
 
     def update_status(self):
         self.calculate_velocity()
+        if Time().time % 60 == 0:
+            self.check_points["vol"].append(str(self.traffic_vol))
+            self.check_points["speed"].append(str(self.avg_speed))
+            self.check_points["den"].append(str((self.sublink1.car_num + self.sublink2.car_num + self.sublink3.car_num)/self.length/(self.lanes_num+0.1)))
+            self.traffic_vol = 0
 
     def calculate_velocity(self):
         if self.length == 0: return
