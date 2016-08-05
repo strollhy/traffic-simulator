@@ -86,7 +86,23 @@ class LoadBalancer(Observer):
         print a, b
         print (a - b) / (b + 0.1)
         print all_total, new_total
+        self.path_section_gap()
         fout.close()
+
+    def path_section_gap(self):
+        for i in xrange(8):
+            total_cost = 0
+            min_cost = 0
+            for od, paths in self.simulator.paths.items():
+                paths = [path for path in paths.values() if path.elapse_time_section[i]]
+                if not paths: continue
+
+                path_with_min_cost = min([path for path in paths], key=lambda x: x.avg_section_cost(i))
+                total_cost += sum([sum(path.elapse_time_section[i]) for path in paths])
+                min_cost += path_with_min_cost.avg_section_cost(i) * sum([len(path.elapse_time_section[i]) for path in paths])
+
+            print (total_cost - min_cost) / (min_cost + 0.1),
+        print
 
 if __name__ == "__main__":
     LoadBalancer(TURNS).start()

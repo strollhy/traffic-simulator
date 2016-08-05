@@ -14,16 +14,6 @@ class OdGenerator:
         self.outfile = open(outfile, "w")
         self.links = {"normal": [], "in": [], "out": []}
 
-    # def run(self, od_num, car_num, ratio=.5):
-    #     for link in LinkReader().links:
-    #         self.links[link.type].append(link.link_id)
-    #
-    #     od_pairs = [sample(self.links["in"], 1) + sample(self.links["out"], 1) for _ in xrange(int(od_num * ratio))]
-    #     od_pairs += [sample(self.links["normal"], 2) for _ in xrange(int(od_num * ratio))]
-    #
-    #     for od_pair in od_pairs:
-    #         self.outfile.write("%s,%s,%d\n" % (od_pair[0], od_pair[1], int(car_num/od_num)))
-
     def rend_from_file(self):
         import csv
         zones = {}

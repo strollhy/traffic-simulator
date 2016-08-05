@@ -58,11 +58,13 @@ class Link(Observable):
 
     def add_path_cost(self, car):
         try:
-            time_ratio = 0.1
+            # time_ratio = 0.1
             # if self.simulator.total_time * time_ratio <= car.start_time <= self.simulator.total_time * (1-time_ratio):
-            self.simulator.paths[car.od][car.path_id].elapse_time += car.arrive_time - car.start_time
+            path = self.simulator.paths[car.od][car.path_id]
+            path.elapse_time += car.arrive_time - car.start_time
+            path.elapse_time_section[car.arrive_time * 8 / self.simulator.total_time - 1].append(car.arrive_time - car.start_time)
         except Exception:
-            pass
+            return
 
     def assign_lane_group(self, car):
         heading_link = car.next_link
